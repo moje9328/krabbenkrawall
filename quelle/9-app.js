@@ -312,7 +312,7 @@
           break;
         case 'bruch': {
           const T = THEMEN[lv.gebiet];
-          const farbe = { holz: '#d89a5a', dach: T.dach[e.farbe % 3], metall: '#93a8bd', fass: '#c98a4e', fassVoll: '#7a3f2a', stein: '#c9bfae', container: T.container[e.farbe % 3] }[e.art] || T.kisten[e.farbe % 3];
+          const farbe = { holz: '#d89a5a', dach: T.dach[e.farbe % 3], metall: '#93a8bd', fass: '#c98a4e', fassVoll: '#7a3f2a', stein: '#c9bfae', keil: '#8a96a6', container: T.container[e.farbe % 3] }[e.art] || T.kisten[e.farbe % 3];
           Grafik.spruehen(e.x, e.y, 'span', 6, { farbe, tempo: 3.5, hoch: 1.5 });
           Grafik.spruehen(e.x, e.y, 'staub', 3, { tempo: 1.3 });
           // Einzelne Teilpunkte zeigt das HUD; am Ort nur eine zusammengefasste Kettenanzeige

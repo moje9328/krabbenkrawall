@@ -66,6 +66,7 @@ const MATERIAL = {
   metall:    { name: 'Metallträger', dichte: 3.6, reibung: 0.5,  rueckprall: 0.05, haltbar: 24,  schwelle: 2.0, punkte: 80, ton: 'metall' },
   stein:     { name: 'Mauerblock',   dichte: 2.0, reibung: 0.85, rueckprall: 0.03, haltbar: 8,   schwelle: 2.0, punkte: 50, ton: 'stein' },
   container: { name: 'Container',    dichte: 1.1, reibung: 0.6,  rueckprall: 0.04, haltbar: 16,  schwelle: 2.2, punkte: 100, ton: 'metall' },
+  keil:      { name: 'Steinkeil',    dichte: 2.6, reibung: 0.95, rueckprall: 0.02, haltbar: 60,  schwelle: 3.0, punkte: 0,  ton: 'stein' },   // Drehpunkt einer Wippe
   boje:      { name: 'Zielboje',     dichte: 0.5, reibung: 0.6,  rueckprall: 0.25, ton: 'boje' },
 };
 

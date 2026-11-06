@@ -83,7 +83,7 @@ async def main():
             await pg.screenshot(path=str(BILDER / f'{name}-pause.png'))
             await pg.click('#pauseLevelKnopf'); await pg.wait_for_timeout(300)
             await pg.screenshot(path=str(BILDER / f'{name}-levelwahl.png'), full_page=False)
-            ok(await pg.evaluate('document.querySelectorAll(".karte").length') == 12, f'{name}: nicht 12 Levelkarten')
+            ok(await pg.evaluate('document.querySelectorAll(".karte").length === window.__krawall.LEVEL.length'), f'{name}: nicht alle Levelkarten')
             ok(await pg.evaluate('document.documentElement.scrollWidth <= innerWidth'), f'{name}: Levelwahl scrollt waagerecht')
             ok(not pg.fehler, f'{name}: Konsolenfehler {pg.fehler}')
             await ctx.close()
@@ -188,7 +188,7 @@ async def main():
         await ctx.close()
 
         # ---------------------------------------------------------- Alle Level im echten Spiel
-        print('\n## Alle 12 Lösungen im echten Game Loop (Originalkrabbe Kalle)')
+        print('\n## Alle Lösungen im echten Game Loop (Originalkrabbe Kalle)')
         ctx, pg = await neue_seite(b, 1440, 900)
         loesungen = await pg.evaluate('window.__krawall.LEVEL.map(l => l.loesung)')
         loesungen = [(i, f) for i, f in enumerate(loesungen)] + [(2, await pg.evaluate('window.__krawall.LEVEL[2].loesungHoch'))]
@@ -224,7 +224,7 @@ async def main():
         # ---------------------------------------------------------- Speicherstand
         print('\n## Speicherstand')
         daten = await pg.evaluate("JSON.parse(localStorage.getItem('pixelhafen.krabbenkrawall'))")
-        ok(daten and daten['version'] == 2 and len(daten['level']) == 12, 'Fortschritt nicht gespeichert')
+        ok(daten and daten['version'] == 2 and len(daten['level']) == len(loesungen) - 1, 'Fortschritt nicht gespeichert')
         sterne_vorher = daten['level']['1']['sterne']
         # Schlechtere Wiederholung von Level 1: Niederlage
         await level_bereit(pg, 0)
@@ -259,6 +259,15 @@ async def main():
         await pg.click('#spielenKnopf'); await pg.wait_for_timeout(300)
         frei = await pg.evaluate('[...document.querySelectorAll(".karte")].map(k => !k.disabled)')
         ok(frei[:4] == [True] * 4 and not any(frei[4:]), f'Übernommene Freischaltung falsch: {frei}')
+        # Spielstand aus der Zeit mit 12 Leveln (frei: 12, Level 12 geschafft): Level 13 muss frei sein
+        alt12 = {str(i): {'sterne': 2, 'best': 2000} for i in range(1, 13)}
+        await pg.evaluate("(d) => localStorage.setItem('pixelhafen.krabbenkrawall', JSON.stringify(d))", {'version': 2, 'ton': True, 'krabbe': 'koko', 'frei': 12, 'level': alt12})
+        await pg.reload(); await pg.wait_for_timeout(300)
+        await pg.click('#spielenKnopf'); await pg.wait_for_timeout(400)
+        frei = await pg.evaluate('[...document.querySelectorAll(".karte")].map(k => !k.disabled)')
+        ok(frei[:13] == [True] * 13 and not any(frei[13:]), f'Alter Spielstand mit 12 Leveln: Freischaltung falsch {frei}')
+        await pg.screenshot(path=str(BILDER / 'levelwahl-alter-stand.png'), full_page=True)
+        print('  Spielstand aus der 12-Level-Version: Level 1–13 frei, 14–32 gesperrt, Sterne erhalten')
         print('  Version 2 gespeichert, Sterne bleiben bei schlechterer Runde, Ton/Krabbe/Freischaltung werden geladen, kaputte Daten stören nicht')
         print('  Alter Spielstand (Version 1): Freischaltung bis Level 4, Ton und Krabbe übernommen, alte Bestpunkte getrennt aufbewahrt')
         await ctx.close()

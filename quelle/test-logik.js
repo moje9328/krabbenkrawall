@@ -2,14 +2,14 @@
 // Es werden genau dieselben Dateien geladen wie im Spiel (lade-logik.js).
 const fs = require('fs'), path = require('path');
 const L = require('./lade-logik.js')();
-const { LEVEL, Welt, PHYSIK, KATAPULT, KRABBE_PHYSIK, MATERIAL, PUNKTE, zugAusWinkel, planck, schwerpunkt } = L;
+const { LEVEL, GEBIETE, Welt, PHYSIK, KATAPULT, KRABBE_PHYSIK, MATERIAL, PUNKTE, zugAusWinkel, planck, schwerpunkt } = L;
 
 let fehler = 0, geprueft = 0;
 function ok(bed, text) { geprueft++; if (!bed) { fehler++; console.log('  FEHLER:', text); } }
 const abschnitt = (t) => console.log('\n## ' + t);
 const NACHBARN = [[-1, 0], [1, 0], [-2, 0], [2, 0], [0, -0.02], [0, 0.02], [0, -0.04], [0, 0.04]];
 const verschiebe = (s, [dw, ds]) => [s[0] + dw, Math.min(1, Math.round((s[1] + ds) * 100) / 100)];
-const testLevel = (teile, o = {}) => ({ id: 90, gebiet: 0, name: 'Test', schuesse: o.schuesse || 1, breite: o.breite || 20, stege: o.stege || [[-5, 30]], sterne: [0, 0], loesung: [], teile });
+const testLevel = (teile, o = {}) => ({ id: 90, gebiet: 0, name: 'Test', schuesse: o.schuesse || 1, breite: o.breite || 20, stege: o.stege || [[-5, 30]], mauern: o.mauern, sterne: [0, 0], loesung: [], teile });
 
 // Schussfolge spielen und dabei Ereignisse und den ersten Treffpunkt der letzten Krabbe merken
 function spielMit(lv, folge) {
@@ -35,6 +35,13 @@ function spielMit(lv, folge) {
 }
 
 // ------------------------------------------------------------------ 1. Stabilität
+abschnitt('Levelaufbau: Anzahl, fortlaufende Nummern, Gebiete');
+ok(LEVEL.length >= 32, `nur ${LEVEL.length} Level`);
+ok(LEVEL.every((l, i) => l.id === i + 1), 'Level-Nummern nicht fortlaufend');
+ok(LEVEL.every(l => GEBIETE[l.gebiet]), 'Level ohne Gebiet');
+ok(GEBIETE.length >= 7, 'zu wenig Gebiete');
+console.log(`  ${LEVEL.length} Level in ${GEBIETE.length} Gebieten: ` + GEBIETE.map((g, i) => `${g.name} (${LEVEL.filter(l => l.gebiet === i).length})`).join(', '));
+
 abschnitt('Jedes Gebäude steht vor dem ersten Schuss stabil (Einschwingen + 20 s)');
 for (const lv of LEVEL) {
   const w = new Welt(lv);
@@ -54,7 +61,7 @@ for (const lv of LEVEL) {
   ok(w.teile.every((b, i) => b.getUserData().schaden === schadenVorher[i]), `L${lv.id}: ruhender Kontakt macht Schaden`);
   ok(w.punkte === 0 && w.bojenUebrig === w.bojenGesamt && w.bonusGesammelt === 0, `L${lv.id}: Punkte, Bojen oder Münzen ohne Schuss`);
   const schwach = lv.teile.filter(t => t.riss).length;
-  const lasten = lv.teile.filter(t => ['fassVoll', 'container', 'metall', 'fass'].includes(t.art)).length;
+  const lasten = lv.teile.filter(t => ['fassVoll', 'container', 'metall', 'fass', 'keil'].includes(t.art)).length;
   ok(schwach + lasten > 0 || lv.id === 7, `L${lv.id}: keine erkennbare Schwachstelle`);
   console.log(`  L${lv.id} ${lv.name}: ${start.length} Teile, max. Setzung ${maxVers.toFixed(3)} m, 20 s ruhig, ${lv.teile.filter(t => t.art === 'boje').length} Ziele, ${lv.teile.filter(t => t.art === 'bonus').length} Münzen, ${schwach} angeknackste Teile, ${lasten} Lasten`);
 }
@@ -151,6 +158,62 @@ for (const [name, teil] of [['20-cm-Holzstütze', { art: 'holz', x: 7, y: 1.5, w
   console.log(`  ${name} bei voller Kraft: kein Durchfliegen ohne Kontakt`);
 }
 
+// ------------------------------------------------------------------ 6b. Neue Mechaniken
+abschnitt('Neue Mechaniken: Kaimauer und Wippe');
+{
+  // Kaimauer: fest, wird nicht durchflogen, Vorschau endet an ihr
+  const lv = testLevel([{ art: 'boje', x: 15, y: 0.45 }], { mauern: [[7, 8, 3]] });
+  const w = new Welt(lv);
+  const bahn = w.flugbahn(zugAusWinkel(5, 1), 2);
+  ok(bahn.kontakt && bahn.kontakt.x < 7, `Vorschau läuft durch die Kaimauer (${bahn.kontakt && bahn.kontakt.x})`);
+  w.abschuss(zugAusWinkel(5, 1));
+  let durch = false;
+  for (let i = 0; i < 200 && w.krabbe; i++) { w.schritt(); if (w.krabbe && w.krabbe.body.getPosition().x > 7.5) durch = true; }
+  ok(!durch, 'Krabbe fliegt durch die Kaimauer');
+  console.log('  Kaimauer: Vorschau endet davor, die Krabbe prallt ab und fliegt nicht hindurch');
+}
+{
+  // Wippe: Treffer auf das hohe Ende schleudert die Last nach oben
+  const lv = LEVEL.find(l => l.name === 'Die Wippe');
+  const w = new Welt(lv);
+  const planke = w.teile.find(b => b.getUserData().art === 'holz' && Math.abs(b.getAngle()) > 0.1);
+  const last = w.teile.find(b => b.getUserData().art === 'boje' && Math.abs(b.getAngle()) > 0.1);
+  let erster = null, durch = null;
+  const lastId = last.getUserData().id;
+  w.abschuss(zugAusWinkel(...lv.loesung[0]));
+  for (let i = 0; i < 300 && w.schuss; i++) {
+    w.schritt();
+    if (w.krabbe && w.krabbe.erster && !erster) erster = w.krabbe.erster;
+    for (const e of w.ereignisse) if (e.typ === 'boje' && e.id === lastId) durch = e.durch;
+    w.ereignisse.length = 0;
+  }
+  ok(erster && erster.id === planke.getUserData().id, 'Musterlösung trifft nicht zuerst die Wippe');
+  ok(durch === 'holz', `Boje auf der Wippe wurde nicht von der hochschnellenden Planke aktiviert (${durch})`);
+  const keil = w.teile.find(b => b.getUserData().art === 'keil');
+  ok(keil && !keil.getUserData().weg, 'Steinkeil zerbricht');
+  console.log(`  Wippe (L${lv.id}): erster Treffer auf das hohe Ende, die hochschnellende Planke schleudert die Boje (aktiviert durch: ${durch}); der Steinkeil bleibt ganz`);
+}
+
+// ------------------------------------------------------------------ 6c. Schwierigkeitsverlauf
+abschnitt('Schwierigkeit steigt innerhalb jedes Gebiets (Anteil der Ein-Schuss-Siege im groben Raster)');
+{
+  const anteil = {};
+  for (const lv of LEVEL) {
+    let siege = 0, n = 0;
+    for (let w = -10; w <= 80; w += 4) for (let st = 0.3; st <= 1.0001; st += 0.1) { n++; if (L.spiele(lv, [[w, Math.round(st * 100) / 100]]).ergebnis === 'erfolg') siege++; }
+    anteil[lv.id] = siege / n;
+  }
+  GEBIETE.forEach((g, gi) => {
+    const ls = LEVEL.filter(l => l.gebiet === gi);
+    const erst = anteil[ls[0].id], letzt = anteil[ls[ls.length - 1].id];
+    if (gi >= 3) ok(letzt < erst, `${g.name}: letztes Level nicht schwerer als das erste`);
+    console.log(`  ${g.name.padEnd(20)} ` + ls.map(l => `L${l.id} ${(anteil[l.id] * 100).toFixed(0)}%`).join('  '));
+  });
+  const mittel = (a, b) => { const ls = LEVEL.filter(l => l.id >= a && l.id <= b); return ls.reduce((s, l) => s + anteil[l.id], 0) / ls.length; };
+  ok(mittel(28, 32) < mittel(1, 4), 'Eishafen ist im Schnitt nicht schwerer als der Fischerkai');
+  console.log(`  Durchschnitt Fischerkai ${(mittel(1, 4) * 100).toFixed(0)}%, Eishafen ${(mittel(28, 32) * 100).toFixed(0)}%`);
+}
+
 // ------------------------------------------------------------------ 7. Punkte, Münzen, Ketten
 abschnitt('Punkte, Münzen und Kettenbonus zählen genau einmal');
 for (const lv of LEVEL) {
@@ -169,7 +232,7 @@ for (const lv of LEVEL) {
   ok(r.w.kettenPunkte <= PUNKTE.ketteDeckel * r.w.schussNummer, `L${lv.id}: Kettenbonus über dem Deckel`);
   ok(r.w.endpunkte() === r.w.punkte + r.w.schuesseUebrig * PUNKTE.krabbeUebrig, `L${lv.id}: Restkrabbenbonus falsch`);
 }
-console.log('  Alle 12 Lösungen: jedes Objekt höchstens ein Ereignis, Punktestand = Summe aller Ereignisse, Kettenbonus gedeckelt');
+console.log(`  Alle ${LEVEL.length} Lösungen: jedes Objekt höchstens ein Ereignis, Punktestand = Summe aller Ereignisse, Kettenbonus gedeckelt`);
 {
   // Münze in einer ruhenden Kiste: wird nie eingesammelt
   const welt = new Welt(testLevel([{ art: 'kiste', x: 10, y: 0.5, w: 1, h: 1 }, { art: 'bonus', x: 10, y: 0.5 }, { art: 'boje', x: 14, y: 0.45 }]));

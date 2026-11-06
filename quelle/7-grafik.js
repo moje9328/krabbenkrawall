@@ -13,26 +13,58 @@ const KRABBE_EINHEIT = 1 / 33;   // Meter pro Zeichen-Einheit der Krabbe (44 x 3
 const KONTUR = '#1b2440';        // Marineblau-dunkel für alle Umrisse
 
 const THEMEN = [
-  { // Fischerkai: freundliches Tageslicht
+  { stil: 'kai', // Fischerkai: freundliches Tageslicht
     himmel: ['#4fc0f0', '#9fe2ff', '#e8f9ff'], sonne: '#FFE27A', wolke: '#ffffff',
     wasser: ['#26c6c9', '#138a9e', '#0d5f7a'], welle: '#c9fbff',
     steg: '#c98a4e', stegDunkel: '#8a5530', stegHell: '#e8b070',
     kisten: ['#24b9b0', '#ffc94d', '#ff805b'], dach: ['#ff805b', '#3a86d4', '#24b9b0'], container: ['#24b9b0', '#ff805b', '#ffc94d'],
     fern: ['#f3e6cc', '#e2d2b4'], fernDach: ['#ff9d7e', '#7fb3e6', '#7dd6cf', '#ffd27a'], dunst: 0.42,
   },
-  { // Containerhafen: bunt und sonnig
+  { stil: 'container', // Containerhafen: bunt und sonnig
     himmel: ['#3eb2e0', '#93dcf5', '#effbf6'], sonne: '#FFF0A8', wolke: '#ffffff',
     wasser: ['#1fbcc0', '#11809a', '#0b5574'], welle: '#c4f7ff',
     steg: '#b9a58a', stegDunkel: '#7d6c58', stegHell: '#d8c6aa',
     kisten: ['#1fb5ab', '#ff7a3c', '#ffc94d'], dach: ['#3a86d4', '#ff7a3c', '#1fb5ab'], container: ['#1fb5ab', '#ff7a3c', '#3a86d4'],
     fern: ['#e8eef2', '#d2dde4'], fernDach: ['#ff9a6a', '#5fb8d9', '#ffd27a', '#7dd6cf'], dunst: 0.4,
   },
-  { // Leuchtturmbucht: warmes Abendlicht
+  { stil: 'bucht', // Leuchtturmbucht: warmes Abendlicht
     himmel: ['#5a3c94', '#c46a9a', '#ffc17a'], sonne: '#FFD06A', wolke: '#ffd9c4',
     wasser: ['#4aa8c8', '#2f6f9e', '#22416f'], welle: '#ffe0b0',
     steg: '#b97a4a', stegDunkel: '#7a4527', stegHell: '#dca06a',
     kisten: ['#b58cff', '#ff805b', '#ffd35a'], dach: ['#ff805b', '#7a5fd0', '#ffd35a'], container: ['#7a5fd0', '#ff805b', '#24b9b0'],
     fern: ['#f0c9b0', '#d9a99a'], fernDach: ['#a676d6', '#ff8f7a', '#ffcf7a', '#7a8fd6'], dunst: 0.35,
+  },
+  { stil: 'werft', // Werft im Morgennebel: Pfirsich-Himmel, Schiffsrumpf auf der Helling
+    himmel: ['#8fcbe6', '#f3d6c2', '#fff0dc'], sonne: '#FFE9B0', wolke: '#ffffff',
+    wasser: ['#3fbdb8', '#1f8c97', '#14607a'], welle: '#d6fbff',
+    steg: '#b88a5e', stegDunkel: '#7a5636', stegHell: '#dcb084',
+    kisten: ['#24b9b0', '#ff9a4d', '#5aa0e0'], dach: ['#5aa0e0', '#ff805b', '#24b9b0'], container: ['#ff9a4d', '#24b9b0', '#5aa0e0'],
+    fern: ['#efe2cf', '#ddcdb6'], fernDach: ['#8fb8d8', '#f2a98a', '#9fd6c8', '#f5cf8a'], dunst: 0.5,
+    mauer: ['#8d9cae', '#6b7a8e'],
+  },
+  { stil: 'nacht', // Fischmarkt bei Nacht: Laternen und Mond
+    himmel: ['#121a42', '#27306c', '#46468a'], sonne: '#FFF4C8', wolke: '#3c4682',
+    wasser: ['#2b6496', '#1b4170', '#0f2448'], welle: '#ffd98a',
+    steg: '#b07a4c', stegDunkel: '#6e4528', stegHell: '#d6a06c',
+    kisten: ['#29c7bd', '#ffc94d', '#ff7a6a'], dach: ['#ff7a6a', '#29c7bd', '#ffc94d'], container: ['#29c7bd', '#ff7a6a', '#ffc94d'],
+    fern: ['#2f3a70', '#283160'], fernDach: ['#3d4a88', '#4a3f80', '#35517e', '#523d78'], dunst: 0.22,
+    mauer: ['#6f7f99', '#55647e'], nacht: true,
+  },
+  { stil: 'sturm', // Sturmküste: graue Wolken, Regen, hoher Seegang
+    himmel: ['#4c6175', '#7d92a3', '#b8c6cc'], sonne: '#e8eef0', wolke: '#a3b1bb',
+    wasser: ['#3d9396', '#2a6872', '#1a4552'], welle: '#e6fbff',
+    steg: '#a9825c', stegDunkel: '#6c4f35', stegHell: '#ccA57c',
+    kisten: ['#ffc94d', '#ff7a3c', '#29c7bd'], dach: ['#ff7a3c', '#ffc94d', '#29c7bd'], container: ['#ff7a3c', '#ffc94d', '#29c7bd'],
+    fern: ['#c3cdd2', '#aab6bd'], fernDach: ['#7f95a6', '#9a8f9a', '#8aa2a0', '#a99a86'], dunst: 0.45,
+    mauer: ['#7d8a96', '#5e6b78'], wellen: 1.7,
+  },
+  { stil: 'eis', // Eishafen: kalter Glanz, Eisberge, Schneefall
+    himmel: ['#86c3ec', '#cbe7f9', '#f2faff'], sonne: '#FFF6D0', wolke: '#ffffff',
+    wasser: ['#56c1d6', '#3592b8', '#256896'], welle: '#ffffff',
+    steg: '#a98466', stegDunkel: '#6d5642', stegHell: '#d4b496',
+    kisten: ['#ff7a5c', '#3a86d4', '#ffc94d'], dach: ['#3a86d4', '#ff7a5c', '#7a5fd0'], container: ['#ff7a5c', '#3a86d4', '#7a5fd0'],
+    fern: ['#e6eef5', '#d4e0ea'], fernDach: ['#ffffff', '#f4f8fc', '#ffffff', '#eef4fa'], dunst: 0.45,
+    mauer: ['#93a7ba', '#6f849a'], schnee: true,
   },
 ];
 
@@ -75,7 +107,7 @@ const Grafik = (() => {
 
   function setzeLevel(lv) {
     level = lv;
-    thema = THEMEN[GEBIETE[lv.gebiet] ? lv.gebiet : 0];
+    thema = THEMEN[THEMEN[lv.gebiet] ? lv.gebiet : 0];
     grenzen = bauGrenzen(lv);
     effekte = [];
     sprites.clear();
@@ -85,12 +117,14 @@ const Grafik = (() => {
   // --------------------------------------------------------------- Kamera
   // Umriss des Gebäudes (und der Bonusmünzen) aus den Leveldaten
   function bauGrenzen(lv) {
-    let x0 = 1e9, x1 = -1e9, y1 = 0;
+    let x0 = 1e9, x1 = -1e9, y1 = 0, teileX0 = 1e9;
     for (const t of lv.teile) {
+      if (t.art !== 'bonus') teileX0 = Math.min(teileX0, t.punkte ? Math.min(...t.punkte.map(q => q[0])) : t.x - (t.w || (t.r || 0.5) * 2) / 2);
       const pts = t.punkte || [[t.x - (t.w || (t.r || 0.5) * 2) / 2, t.y - (t.h || (t.r || 0.5) * 2) / 2], [t.x + (t.w || (t.r || 0.5) * 2) / 2, t.y + (t.h || (t.r || 0.5) * 2) / 2]];
       for (const [x, y] of pts) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
     }
-    return { x0, x1, oben: y1 };
+    for (const [mx0, mx1, oben] of (lv.mauern || [])) { x0 = Math.min(x0, mx0); x1 = Math.max(x1, mx1); y1 = Math.max(y1, oben); }
+    return { x0, x1, oben: y1, teileX0 };
   }
 
   // Bildausschnitt aus Startpunkt, Gebäudeausmaßen und Flugraumreserve.
@@ -119,7 +153,7 @@ const Grafik = (() => {
     const ganz = ansicht(lv);
     if (ganz.z / dpr >= MIN_ZOOM - 0.01) return ganz;
     // So nah, dass Katapult und die vorderen tragenden Stützen gemeinsam im Bild sind
-    const links = -1.7, rechts = grenzen.x0 + 3.2;
+    const links = -1.7, rechts = grenzen.teileX0 + 3.2;   // vorderste Bauteile (nicht Mauer oder Münze)
     const z = Math.max(MIN_ZOOM, Math.min(MIN_ZOOM + 4, cssW / (rechts - links), (cssH - 120) / (reserve() + 1)));
     const r = rahmen(0, 0, reserve(), z, 64, 56);
     return { x: links + cssW / 2 / z, y: r.y, z: z * dpr };
@@ -204,6 +238,21 @@ const Grafik = (() => {
     g.fillStyle = thema.himmel[2];
     g.fillRect(0, 0, W, horizont);
     g.globalAlpha = 1;
+    // Nachts: warmes Scheinwerferlicht hinter dem Gebäude, damit es sich abhebt
+    if (thema.nacht) {
+      const gx = bx((grenzen.x0 + grenzen.x1) / 2), gy = by(grenzen.oben * 0.5);
+      const r = Math.max(grenzen.x1 - grenzen.x0, grenzen.oben) * 0.9 * z;
+      const licht = g.createRadialGradient(gx, gy, 0, gx, gy, r);
+      licht.addColorStop(0, 'rgba(255, 214, 140, 0.42)');
+      licht.addColorStop(1, 'rgba(255, 214, 140, 0)');
+      g.fillStyle = licht;
+      g.fillRect(gx - r, gy - r, 2 * r, 2 * r);
+      // Licht der Katapult-Laterne
+      const kx = bx(0), ky = by(2.2), kr = 3.2 * z;
+      const kl = g.createRadialGradient(kx, ky, 0, kx, ky, kr);
+      kl.addColorStop(0, 'rgba(255, 214, 140, 0.32)'); kl.addColorStop(1, 'rgba(255, 214, 140, 0)');
+      g.fillStyle = kl; g.fillRect(kx - kr, ky - kr, 2 * kr, 2 * kr);
+    }
     // Wasser
     const wv = g.createLinearGradient(0, horizont, 0, H);
     wv.addColorStop(0, thema.wasser[0]);
@@ -214,6 +263,7 @@ const Grafik = (() => {
     // Steg und Deko auf dem Steg
     for (const [x0, x1] of level.stege) maleSteg(g, x0, x1);
     stegDeko(g);
+    for (const [x0, x1, oben] of (level.mauern || [])) maleMauer(g, x0, x1, oben);
     malePoller(g, KATAPULT.x - KATAPULT.pollerAbstand, true);
     g.restore();
   }
@@ -233,19 +283,31 @@ const Grafik = (() => {
   }
 
   function sonneUndWolken(g, fx, fy, fz) {
-    const sx = level.gebiet === 2 ? fx(20) : fx(30), sy = level.gebiet === 2 ? fy(4) : fy(16);
-    const glow = g.createRadialGradient(sx, sy, 0, sx, sy, 6 * fz);
-    glow.addColorStop(0, 'rgba(255, 236, 160, 0.8)');
-    glow.addColorStop(1, 'rgba(255, 236, 160, 0)');
-    g.fillStyle = glow;
-    g.fillRect(sx - 6 * fz, sy - 6 * fz, 12 * fz, 12 * fz);
-    oval(g, sx, sy, 2 * fz, 2 * fz, thema.sonne, 'rgba(27, 36, 64, 0.15)', Math.max(1, fz * 0.08));
+    const stil = thema.stil, tief = stil === 'bucht' || stil === 'werft';
+    const sx = tief ? fx(20) : fx(30), sy = tief ? fy(stil === 'werft' ? 7 : 4) : fy(16);
+    if (stil === 'nacht') {
+      // Sterne und Mond
+      g.fillStyle = 'rgba(255, 244, 220, 0.85)';
+      for (let i = 0; i < 70; i++) { const x = ((i * 137.5) % 100) / 100 * W, y = ((i * 71.3) % 100) / 100 * fy(2); const r = (i % 3 === 0 ? 1.6 : 1) * dpr; g.fillRect(x, y, r, r); }
+      const mg = g.createRadialGradient(sx, sy, 0, sx, sy, 5 * fz);
+      mg.addColorStop(0, 'rgba(255, 244, 200, 0.5)'); mg.addColorStop(1, 'rgba(255, 244, 200, 0)');
+      g.fillStyle = mg; g.fillRect(sx - 5 * fz, sy - 5 * fz, 10 * fz, 10 * fz);
+      oval(g, sx, sy, 1.6 * fz, 1.6 * fz, thema.sonne);
+      oval(g, sx + 0.7 * fz, sy - 0.3 * fz, 1.3 * fz, 1.3 * fz, thema.himmel[1]);
+    } else if (stil !== 'sturm') {
+      const glow = g.createRadialGradient(sx, sy, 0, sx, sy, 6 * fz);
+      glow.addColorStop(0, 'rgba(255, 236, 160, 0.8)');
+      glow.addColorStop(1, 'rgba(255, 236, 160, 0)');
+      g.fillStyle = glow;
+      g.fillRect(sx - 6 * fz, sy - 6 * fz, 12 * fz, 12 * fz);
+      oval(g, sx, sy, 2 * fz, 2 * fz, thema.sonne, 'rgba(27, 36, 64, 0.15)', Math.max(1, fz * 0.08));
+    }
     // Wolken wandern mit eigener, langsamer Parallaxe
     const wz = Math.max(kam.z * 0.4, fz * 0.8);
     for (const [x, y, s] of [[-8, 13, 1.5], [6, 17, 1.1], [19, 12, 1.8], [33, 16, 1.2], [46, 14, 1.5], [-2, 24, 1.3], [14, 28, 1.6], [28, 23, 1.1], [-12, 32, 1.4], [6, 38, 1.2]]) {
       const yy = fy(y);
       if (yy < -s * wz * 2) continue;
-      wolke(g, W / 2 + (x - kam.x * 0.2) * wz, yy, s * wz * 1.2);
+      wolke(g, W / 2 + (x - kam.x * 0.2) * wz, yy, s * wz * (thema.stil === 'sturm' ? 1.9 : 1.2));
     }
   }
 
@@ -260,7 +322,7 @@ const Grafik = (() => {
     g.lineWidth = Math.max(1, fz * 0.08);
     g.strokeRect(x0, y1, x1 - x0, y0 - y1);
     // Fenster und Tor
-    g.fillStyle = level.gebiet === 2 ? '#ffd56a' : 'rgba(58, 90, 130, 0.55)';
+    g.fillStyle = thema.stil === 'bucht' || thema.nacht ? '#ffd56a' : 'rgba(58, 90, 130, 0.55)';
     for (let i = 0; i < Math.floor(b / 1.4); i++) g.fillRect(x0 + (0.5 + i * 1.4) * fz, y1 + fz * 0.6, fz * 0.6, fz * 0.6);
     g.fillStyle = 'rgba(27, 36, 64, 0.3)';
     g.fillRect(x0 + (x1 - x0) * 0.35, y0 - fz * 1.3, (x1 - x0) * 0.3, fz * 1.3);
@@ -293,7 +355,11 @@ const Grafik = (() => {
 
   function fernKulisse(g, fx, fy, fz, horizont) {
     const dach = thema.fernDach, wand = thema.fern;
-    if (level.gebiet === 1) {
+    if (thema.stil === 'werft') werftKulisse(g, fx, fy, fz);
+    else if (thema.stil === 'nacht') nachtKulisse(g, fx, fy, fz);
+    else if (thema.stil === 'sturm') sturmKulisse(g, fx, fy, fz, horizont);
+    else if (thema.stil === 'eis') eisKulisse(g, fx, fy, fz);
+    else if (thema.stil === 'container') {
       // Containerstapel und Kräne
       const farben = ['#5fb8d9', '#ff9a6a', '#ffd27a', '#7dd6cf', '#a8b8d8'];
       for (let i = 0; i < 16; i++) {
@@ -325,13 +391,159 @@ const Grafik = (() => {
         const x = -16 + i * 7.3, b = 4 + (i % 3), h = 2.4 + (i % 2) * 1.4;
         haus(g, x, b, h, dach[i % dach.length], fx, fy, fz, wand[i % 2]);
       }
-      schiff(g, 9, fx, fy, fz, level.gebiet === 2 ? '#7a5fd0' : '#ff805b', false);
+      const bucht = thema.stil === 'bucht';
+      schiff(g, 9, fx, fy, fz, bucht ? '#7a5fd0' : '#ff805b', false);
       schiff(g, 36, fx, fy, fz, '#3a86d4', true);
-      leuchtturm(g, level.gebiet === 2 ? 47 : 58, fx, fy, fz, level.gebiet === 2 ? 11 : 8);
+      leuchtturm(g, bucht ? 47 : 58, fx, fy, fz, bucht ? 11 : 8);
     }
     // ferne Hafenmauer am Horizont
     g.fillStyle = 'rgba(27, 36, 64, 0.18)';
     g.fillRect(0, horizont - fz * 0.25, W, fz * 0.25);
+  }
+
+  // Werft: Schiffsrumpf auf der Helling mit Gerüst, Portalkran, Hallen
+  function werftKulisse(g, fx, fy, fz) {
+    for (let i = 0; i < 6; i++) haus(g, -22 + i * 9, 6, 3.2 + (i % 2), thema.fernDach[i % 4], fx, fy, fz, thema.fern[i % 2]);
+    // Rumpf
+    const r0 = 8, r1 = 30;
+    flaeche(g, '#d9785a', 'rgba(27, 36, 64, 0.35)', fx(r0), fy(5.5), fx(r1), fy(7), fx(r1 - 2), fy(1), fx(r0 + 3), fy(0.6));
+    g.fillStyle = '#f2eadb'; g.fillRect(fx(r0 + 0.4), fy(5.6), (r1 - r0 - 0.6) * fz, 0.5 * fz);
+    g.fillStyle = 'rgba(27, 36, 64, 0.15)';
+    for (let x = r0 + 2; x < r1 - 1; x += 1.8) oval(g, fx(x), fy(4.2), 0.25 * fz, 0.25 * fz, 'rgba(27, 36, 64, 0.18)');
+    // Gerüst
+    g.strokeStyle = 'rgba(120, 90, 60, 0.5)'; g.lineWidth = Math.max(1, 0.12 * fz);
+    g.beginPath();
+    for (let x = r0 - 1; x <= r1 + 1; x += 3) { g.moveTo(fx(x), fy(0)); g.lineTo(fx(x), fy(8)); }
+    for (let y = 2; y <= 8; y += 2) { g.moveTo(fx(r0 - 1), fy(y)); g.lineTo(fx(r1 + 1), fy(y)); }
+    g.stroke();
+    // Portalkran
+    g.strokeStyle = 'rgba(90, 160, 224, 0.5)'; g.lineWidth = Math.max(1.5, 0.3 * fz);
+    g.beginPath(); g.moveTo(fx(4), fy(0)); g.lineTo(fx(4), fy(12)); g.moveTo(fx(36), fy(0)); g.lineTo(fx(36), fy(12)); g.moveTo(fx(3), fy(12)); g.lineTo(fx(37), fy(12)); g.stroke();
+    g.fillStyle = 'rgba(255, 201, 77, 0.6)'; g.fillRect(fx(18), fy(12.8), 3 * fz, 1 * fz);
+    g.strokeStyle = 'rgba(27, 36, 64, 0.35)'; g.lineWidth = Math.max(1, 0.05 * fz);
+    g.beginPath(); g.moveTo(fx(19.5), fy(11.8)); g.lineTo(fx(19.5), fy(8.6)); g.stroke();
+    leuchtturm(g, 58, fx, fy, fz, 7);
+  }
+
+  // Nachtmarkt: Marktbuden mit Licht, Laternenketten
+  function nachtKulisse(g, fx, fy, fz) {
+    for (let i = 0; i < 11; i++) {
+      const x = -20 + i * 6.4, b = 3.6 + (i % 3) * 0.7, h = 2.2 + (i % 2) * 1.6;
+      haus(g, x, b, h, thema.fernDach[i % 4], fx, fy, fz, thema.fern[i % 2]);
+      // Marktmarkise
+      const farbe = ['#ff7a6a', '#29c7bd', '#ffc94d'][i % 3];
+      for (let k = 0; k < 4; k++) { g.fillStyle = k % 2 ? '#fff4dc' : farbe; g.globalAlpha = 0.7; g.fillRect(fx(x + k * b / 4), fy(1.6), b / 4 * fz, 0.5 * fz); }
+      g.globalAlpha = 1;
+    }
+    for (const kette of laternenKetten()) {
+      g.strokeStyle = 'rgba(255, 230, 180, 0.35)'; g.lineWidth = Math.max(1, 0.05 * fz);
+      g.beginPath(); g.moveTo(fx(kette.x0), fy(kette.y)); g.quadraticCurveTo(fx((kette.x0 + kette.x1) / 2), fy(kette.y - 1.6), fx(kette.x1), fy(kette.y)); g.stroke();
+      for (const [lx, ly, f] of kette.lampen) oval(g, fx(lx), fy(ly), 0.28 * fz, 0.34 * fz, f, 'rgba(27, 36, 64, 0.5)', 1);
+    }
+    leuchtturm(g, 54, fx, fy, fz, 9);
+  }
+  function laternenKetten() {
+    const ketten = [];
+    for (const [x0, x1, y] of [[-14, 4, 6], [4, 22, 6.5], [22, 40, 6]]) {
+      const lampen = [];
+      for (let i = 1; i < 8; i++) { const t = i / 8; lampen.push([x0 + (x1 - x0) * t, y - 0.8 * 4 * t * (1 - t), ['#ffcf6a', '#ff8a6a', '#7fe0d6'][i % 3]]); }   // Durchhang wie die Kette
+      ketten.push({ x0, x1, y, lampen });
+    }
+    return ketten;
+  }
+
+  // Sturmküste: Felsklippen, Leuchtturm, Gischt
+  function sturmKulisse(g, fx, fy, fz, horizont) {
+    g.fillStyle = '#7f8f99';
+    g.beginPath(); g.moveTo(fx(-30), horizont);
+    for (const [x, y] of [[-26, 3], [-20, 5.5], [-14, 4], [-8, 6.5], [-3, 4.5], [0, 2]]) g.lineTo(fx(x), fy(y));
+    g.lineTo(fx(2), horizont); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(fx(34), horizont);
+    for (const [x, y] of [[37, 4], [42, 6], [48, 5.2], [54, 7], [60, 4.5], [66, 3]]) g.lineTo(fx(x), fy(y));
+    g.lineTo(fx(70), horizont); g.closePath(); g.fill();
+    for (let i = 0; i < 4; i++) haus(g, 6 + i * 6.5, 4, 2.4 + (i % 2), thema.fernDach[i % 4], fx, fy, fz, thema.fern[i % 2]);
+    leuchtturm(g, 48, fx, fy, fz + 0, 12);
+    schiff(g, 22, fx, fy, fz, '#ff7a3c', false);
+  }
+
+  // Eishafen: Eisberge, verschneite Häuser
+  function eisKulisse(g, fx, fy, fz) {
+    for (const [x, b, h] of [[-24, 9, 6], [-10, 6, 4], [30, 11, 8], [46, 7, 5]]) {
+      flaeche(g, '#f4fbff', 'rgba(60, 110, 150, 0.35)', fx(x), fy(0), fx(x + b * 0.3), fy(h), fx(x + b * 0.55), fy(h * 0.8), fx(x + b * 0.7), fy(h * 1.05), fx(x + b), fy(0));
+      flaeche(g, 'rgba(120, 180, 220, 0.35)', null, fx(x + b * 0.55), fy(h * 0.8), fx(x + b * 0.7), fy(h * 1.05), fx(x + b), fy(0), fx(x + b * 0.6), fy(0));
+    }
+    for (let i = 0; i < 6; i++) {
+      const x = 0 + i * 5.2, h = 2.2 + (i % 2) * 1.2;
+      haus(g, x, 4, h, '#ffffff', fx, fy, fz, ['#e9b9a8', '#b9cfe6', '#f2d7a8'][i % 3]);
+    }
+    leuchtturm(g, 60, fx, fy, fz, 8);
+  }
+
+  // Kaimauer: massive, feste Steinkante (Gelände). Bewusst kühl und dunkler
+  // als die beweglichen beigen Mauerblöcke, damit man sie nicht verwechselt.
+  function maleMauer(g, x0, x1, oben) {
+    const z = kam.z, [hell, dunkel] = thema.mauer || ['#8d9cae', '#6b7a8e'];
+    const unten = PHYSIK.wasserY - 3;
+    const v = g.createLinearGradient(0, by(oben), 0, by(unten));
+    v.addColorStop(0, hell); v.addColorStop(1, dunkel);
+    g.fillStyle = v;
+    g.fillRect(bx(x0), by(oben), (x1 - x0) * z, (oben - unten) * z);
+    // Quader
+    g.strokeStyle = 'rgba(27, 36, 64, 0.32)'; g.lineWidth = Math.max(1, 0.03 * z);
+    let reihe = 0;
+    for (let y = oben - 0.2; y > unten; y -= 0.55, reihe++) {
+      g.beginPath(); g.moveTo(bx(x0), by(y)); g.lineTo(bx(x1), by(y)); g.stroke();
+      for (let x = x0 + (reihe % 2 ? 0.55 : 1.1); x < x1 - 0.1; x += 1.1) { g.beginPath(); g.moveTo(bx(x), by(y)); g.lineTo(bx(x), by(Math.max(unten, y - 0.55))); g.stroke(); }
+    }
+    // Algen an der Wasserlinie
+    g.fillStyle = 'rgba(60, 120, 80, 0.45)';
+    g.fillRect(bx(x0), by(PHYSIK.wasserY + 0.25), (x1 - x0) * z, 0.35 * z);
+    // Abdeckstein oben
+    eckig(g, bx(x0 - 0.06), by(oben), (x1 - x0 + 0.12) * z, 0.22 * z, 0.05 * z, thema.schnee ? '#f6fbff' : '#c4ced8', KONTUR, Math.max(1.2, 0.05 * z));
+    g.strokeStyle = KONTUR; g.lineWidth = Math.max(1.2, 0.05 * z);
+    g.strokeRect(bx(x0), by(oben), (x1 - x0) * z, (oben - unten) * z);
+  }
+
+  // Dezente Wetter-Animationen hinter den Spielobjekten (nur ohne „weniger Bewegung“)
+  function wetter() {
+    if (wenigBewegung) return;
+    const z = kam.z;
+    if (thema.stil === 'werft') {
+      // Nebelschwaden ziehen langsam vorbei
+      for (let i = 0; i < 3; i++) {
+        const x = ((zeit * (8 + i * 4) * dpr + i * W * 0.4) % (W * 1.6)) - W * 0.3, y = by(1.2 + i * 1.6);
+        const r = W * 0.35;
+        const n = c.createRadialGradient(x, y, 0, x, y, r);
+        n.addColorStop(0, 'rgba(255, 255, 255, 0.16)'); n.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        c.fillStyle = n; c.save(); c.translate(0, y); c.scale(1, 0.25); c.translate(0, -y); c.fillRect(x - r, y - r, 2 * r, 2 * r); c.restore();
+      }
+    } else if (thema.stil === 'nacht') {
+      // Laternen glimmen leicht
+      const horizont = by(PHYSIK.wasserY), fz = Math.max(z * 0.5, horizont / 26);
+      const fx = (x) => W / 2 + (x - kam.x * 0.4) * fz, fy = (y) => horizont - y * fz;
+      for (const kette of laternenKetten()) for (const [lx, ly, f] of kette.lampen) {
+        const a = 0.18 + 0.1 * Math.sin(zeit * 3 + lx);
+        const gx = fx(lx), gy = fy(ly), r = 1.1 * fz;
+        const gl = c.createRadialGradient(gx, gy, 0, gx, gy, r);
+        gl.addColorStop(0, `rgba(255, 220, 150, ${a.toFixed(2)})`); gl.addColorStop(1, 'rgba(255, 220, 150, 0)');
+        c.fillStyle = gl; c.fillRect(gx - r, gy - r, 2 * r, 2 * r);
+      }
+    } else if (thema.stil === 'sturm') {
+      c.strokeStyle = 'rgba(230, 245, 255, 0.28)'; c.lineWidth = Math.max(1, 0.025 * z); c.lineCap = 'round';
+      c.beginPath();
+      for (let i = 0; i < 70; i++) {
+        const x = ((i * 97.13 + zeit * 260 * dpr) % (W + 200)) - 100, y = ((i * 53.7 * dpr + zeit * 900 * dpr) % (H + 100)) - 50;
+        c.moveTo(x, y); c.lineTo(x - 0.25 * z, y + 0.6 * z);
+      }
+      c.stroke();
+    } else if (thema.stil === 'eis') {
+      c.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      for (let i = 0; i < 60; i++) {
+        const x = ((i * 113.7 + Math.sin(zeit * 0.8 + i) * 30 * dpr) % W + W) % W, y = ((i * 61.3 * dpr + zeit * 40 * dpr) % (H + 20)) - 10;
+        const r = (1 + (i % 3)) * dpr;
+        c.fillRect(x, y, r, r);
+      }
+    }
   }
 
   // Holzsteg: Bohlen mit Maserung, Nägel, Pfähle mit Seilen
@@ -346,6 +558,7 @@ const Grafik = (() => {
     r(x0, -0.46, x1, 0, thema.steg);
     r(x0, -0.07, x1, 0, thema.stegHell);
     r(x0, -0.46, x1, -0.36, thema.stegDunkel);
+    if (thema.schnee) { r(x0, -0.02, x1, 0.06, '#f6fbff'); for (let x = x0 + 0.3; x < x1; x += 1.3) oval(g, bx(x), by(0.05), 0.35 * z, 0.06 * z, '#ffffff'); }
     g.strokeStyle = 'rgba(90, 50, 25, 0.35)';
     g.lineWidth = Math.max(1, 0.025 * z);
     for (let x = x0 + 0.9; x < x1; x += 0.9) {
@@ -487,6 +700,7 @@ const Grafik = (() => {
       case 'fass': case 'fassVoll': fass(g, u, s, lw); break;
       case 'metall': metall(g, u, s, lw); break;
       case 'stein': stein(g, u, s, lw); break;
+      case 'keil': keil(g, u, s, lw); break;
       case 'container': container(g, u, s, lw); break;
       case 'boje': boje(g, u, s, lw); break;
     }
@@ -644,6 +858,19 @@ const Grafik = (() => {
     g.fillStyle = 'rgba(90, 70, 50, 0.25)';
     for (let i = 0; i < 5; i++) oval(g, (pz(u.id, i) - 0.5) * w * 0.8, (pz(u.id, i + 7) - 0.5) * h * 0.7, 0.025 * s, 0.02 * s, g.fillStyle);
     rundeckig(g, -w / 2, -h / 2, w, h, 0.08 * s); g.strokeStyle = KONTUR; g.lineWidth = lw; g.stroke();
+  }
+
+  // Steinkeil unter einer Wippe: massiv, mit Achsbolzen an der Spitze
+  function keil(g, u, s, lw) {
+    const pts = u.form.map(([x, y]) => [x * s, -y * s]);
+    g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.closePath();
+    const ys = pts.map(p => p[1]);
+    const v = g.createLinearGradient(0, Math.min(...ys), 0, Math.max(...ys));
+    v.addColorStop(0, '#9aa7b5'); v.addColorStop(1, '#5f6c7c');
+    g.fillStyle = v; g.fill();
+    g.strokeStyle = KONTUR; g.lineWidth = lw; g.lineJoin = 'round'; g.stroke();
+    const spitze = pts.reduce((a, b) => (b[1] < a[1] ? b : a));
+    schraube(g, spitze[0], spitze[1] + 0.14 * s, 0.07 * s);
   }
 
   function container(g, u, s, lw) {
@@ -899,15 +1126,15 @@ const Grafik = (() => {
       c.beginPath();
       for (let x = -schritt * 2 + versatz - (reihe % 2) * schritt; x < W + schritt; x += schritt * 2) {
         c.moveTo(x, yy);
-        c.quadraticCurveTo(x + schritt * 0.5, yy - 0.1 * z, x + schritt, yy);
+        c.quadraticCurveTo(x + schritt * 0.5, yy - 0.1 * z * (thema.wellen || 1), x + schritt, yy);
       }
       c.stroke();
       alpha *= 0.62;
     }
     c.globalAlpha = 1;
-    if (level.gebiet === 2 && !wenigBewegung) {
+    if ((thema.stil === 'bucht' || thema.stil === 'sturm') && !wenigBewegung) {
       const fz = z * 0.5;
-      const lx = W / 2 + (47 - kam.x * 0.4) * fz, ly = y0 - 11.7 * fz;
+      const lx = W / 2 + ((thema.stil === 'sturm' ? 48 : 47) - kam.x * 0.4) * fz, ly = y0 - (thema.stil === 'sturm' ? 12.7 : 11.7) * fz;
       const w = Math.sin(zeit * 0.7) * 0.9 + Math.PI;
       const verl = c.createRadialGradient(lx, ly, 0, lx, ly, 30 * fz);
       verl.addColorStop(0, 'rgba(255, 230, 150, 0.3)');
@@ -931,16 +1158,25 @@ const Grafik = (() => {
     }
   }
 
+  // Punkteanzeige am Ereignisort. Liegt dort schon eine frische Anzeige,
+  // weicht die neue nach oben aus, damit nichts übereinander steht.
   function punkteText(x, y, text, farbe = '#ffd35a', klein = false) {
+    for (let n = 0; n < 4; n++) {
+      const stoert = effekte.some(e => (e.art === 'text' || e.art === 'blase') && e.leben < 0.7 && Math.abs(e.x - x) < 1.4 && Math.abs(e.y - y) < 0.55);
+      if (!stoert) break;
+      y += 0.6;
+    }
     effekt({ art: 'text', x, y, vx: 0, vy: 1.1, leben: 0, max: 1.1, text, farbe, klein });
   }
 
   // Eine einzige Kettenanzeige, die bei jeder weiteren Zerstörung aktualisiert wird
+  // Fester Platz über dem Gebäude, damit sie nicht mit den Punkten am Bruchort kollidiert
   function kette(x, y, anzahl, summe) {
     const alt = effekte.find(e => e.art === 'text' && e.kette);
     const text = `KETTE ×${anzahl}  +${summe}`;
-    if (alt) { alt.text = text; alt.leben = 0; alt.x += (x - alt.x) * 0.3; return; }
-    effekt({ art: 'text', x, y, vx: 0, vy: 0.3, leben: 0, max: 1.3, text, farbe: '#24d6cd', klein: true, kette: true });
+    if (alt) { alt.text = text; alt.leben = 0.2; return; }
+    const kx = grenzen ? (grenzen.x0 + grenzen.x1) / 2 : x, ky = grenzen ? grenzen.oben + 1.4 : y;
+    effekt({ art: 'text', x: kx, y: ky, vx: 0, vy: 0, leben: 0, max: 1.4, text, farbe: '#24d6cd', klein: false, kette: true });
   }
 
   // Kurze Sprechblase der Krabbe
@@ -979,7 +1215,7 @@ const Grafik = (() => {
           c.fillStyle = gl; c.fillRect(sx - 1.4 * z, sy - 1.4 * z, 2.8 * z, 2.8 * z);
         }
       } else if (e.art === 'text') {
-        const groesse = Math.max((e.klein ? 8 : 10) * dpr, (e.klein ? 0.3 : 0.4) * z);
+        const groesse = Math.max((e.klein ? 10 : 12) * dpr, (e.klein ? 0.3 : 0.4) * z);   // auf dem Handy gut lesbar
         c.font = `${Math.round(groesse)}px "Press Start 2P", monospace`;
         c.textAlign = 'center';
         c.globalAlpha = t < 0.7 ? 1 : (1 - t) / 0.3;
@@ -1011,6 +1247,7 @@ const Grafik = (() => {
     const hinten = maleKulisse();
     c.setTransform(1, 0, 0, 1, 0, 0);
     c.drawImage(hinten, 0, 0, hinten.width, hinten.height, 0, 0, hinten === kulisse ? W : hinten.width * 2, hinten === kulisse ? H : hinten.height * 2);
+    wetter();
     const alpha = info.alpha;
     for (const m of welt.bonus) { const u = m.getUserData(); muenze(u.x, u.y, u.id); }
     for (const b of welt.teile) teil(b, alpha);
@@ -1050,6 +1287,7 @@ const Grafik = (() => {
     g.fillStyle = thema.wasser[1]; g.fillRect(0, py(PHYSIK.wasserY), Wv, Hv);
     g.fillStyle = thema.steg;
     for (const [a, b] of lv.stege) { g.fillRect(px(a), py(0), (b - a) * z, 0.4 * z); g.strokeStyle = KONTUR; g.lineWidth = 1; g.strokeRect(px(a), py(0), (b - a) * z, 0.4 * z); }
+    for (const [a, b, oben] of (lv.mauern || [])) { g.fillStyle = (thema.mauer || ['#8d9cae'])[0]; g.fillRect(px(a), py(oben), (b - a) * z, (oben - PHYSIK.wasserY + 1) * z); g.strokeStyle = KONTUR; g.lineWidth = 1; g.strokeRect(px(a), py(oben), (b - a) * z, (oben - PHYSIK.wasserY + 1) * z); g.fillStyle = thema.steg; }
     let id = 0;
     for (const t of lv.teile) {
       if (t.art === 'bonus') {

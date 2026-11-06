@@ -82,6 +82,13 @@ class Welt {
       body.setUserData({ art: 'steg', statisch: true });
       this.statik.push({ art: 'steg', x0, x1 });
     }
+    // Kaimauern: feste, erhöhte Steinkanten (Gelände, kein Gebäudeteil)
+    for (const [x0, x1, oben] of (L.mauern || [])) {
+      const body = this.welt.createBody({ type: 'static', position: planck.Vec2((x0 + x1) / 2, (oben - 3) / 2) });
+      body.createFixture(planck.Box((x1 - x0) / 2, (oben + 3) / 2), { friction: 0.85, filterCategoryBits: KAT.STATIK, filterMaskBits: 0xffff });
+      body.setUserData({ art: 'mauer', statisch: true });
+      this.statik.push({ art: 'mauer', x0, x1, oben });
+    }
     for (const t of L.teile) {
       if (t.art === 'bonus') this.neuerBonus(t);
       else this.neuesTeil(t);
