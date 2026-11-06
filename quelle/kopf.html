@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Krabben-Krawall – Pixelhafen</title>
+<meta name="description" content="Spann das Hafenkatapult, schleudere Kalle die Krabbe und bring Kisten, Planken und Fässer zum Einsturz. 12 Level in 3 Hafengebieten. Kostenlos, ohne Anmeldung, ohne Werbung.">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#10243A">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Krabben-Krawall">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<style>
+  /* Schrift "Press Start 2P", Copyright 2012 The Press Start 2P Project Authors,
+     SIL Open Font License 1.1 (https://openfontlicense.org). Sie steckt direkt in dieser
+     Datei, damit das Spiel auch offline richtig aussieht. */
+  @font-face {
+    font-family: 'Press Start 2P';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(%%SCHRIFT%%) format('woff2');
+  }
+
+  /* Pixelhafen-Farben: Marineblau, Türkis, Sonnengelb, Korallorange, Creme */
+  :root {
+    color-scheme: dark;
+    --bg: #10243A;
+    --surface: #16314F;
+    --surface-2: #1F4066;
+    --line: #2F5A85;
+    --text: #FFF4DC;
+    --muted: #B5CBE0;
+    --gelb: #FFD35A;
+    --gelb-kante: #C9962A;
+    --koralle: #FF805B;
+    --tuerkis: #24D6CD;
+    --violett: #B58CFF;
+    --auf-gelb: #10243A;
+    --retro: 'Press Start 2P', 'Courier New', monospace;
+    --body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { height: 100%; background: var(--bg); }
+  body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    color: var(--text);
+    background: var(--bg);
+    font: 16px/1.5 var(--body);
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  :focus-visible { outline: 3px solid var(--gelb); outline-offset: 3px; border-radius: 6px; }
+  [hidden] { display: none !important; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  #app {
+    position: fixed;
+    inset: 0;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    background: var(--bg);
+  }
+  #buehne {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    /* Nur hier: kein Scrollen, kein Zoomen beim Ziehen */
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  canvas#bild { display: block; width: 100%; height: 100%; cursor: grab; }
+  canvas#bild:active { cursor: grabbing; }
+  canvas#bild:focus-visible { outline: none; }
+
+  /* ---------- Anzeige im Spiel ---------- */
+  #hud {
+    position: absolute;
+    top: 8px; left: 8px; right: 8px;
+    z-index: 2;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .hudfeld {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 6px 10px;
+    background: rgba(16, 36, 58, 0.82);
+    border: 2px solid rgba(255, 244, 220, 0.3);
+    border-radius: 12px;
+    font: 11px/1.3 var(--retro);
+    white-space: nowrap;
+  }
+  .hudlinks { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+  #hudLevel b { color: var(--gelb); font-weight: 400; }
+  #hudName { color: var(--muted); font: 600 13px/1.2 var(--body); overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+  .hudfeld .lbl { color: var(--muted); font: 600 14px/1 var(--body); }
+  .hudfeld b { color: var(--gelb); font-weight: 400; }
+  #hudZieleFeld { border-color: rgba(255, 79, 94, 0.7); }
+  .karte .best { color: var(--muted); font: 600 12px/1.2 var(--body); }
+  .boje-ico { display: inline-block; width: 16px; height: 16px; border-radius: 50%; background: linear-gradient(#ff4f5e 0 30%, #fff4dc 30% 70%, #ff4f5e 70%); border: 2px solid #1a1820; }
+  .hudrechts { display: flex; gap: 6px; align-items: flex-start; }
+  .rund {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    color: var(--text);
+    cursor: pointer;
+    background: rgba(16, 36, 58, 0.82);
+    border: 2px solid rgba(255, 244, 220, 0.35);
+    border-radius: 12px;
+    pointer-events: auto;
+    touch-action: manipulation;
+  }
+  .rund:hover { background: rgba(31, 64, 102, 0.95); }
+  .rund svg { width: 18px; height: 18px; }
+  .rund[aria-pressed="true"] { color: var(--auf-gelb); background: var(--gelb); }
+  :root:not(.eng) #uebersichtKnopf { display: none; }
+  :root:not([data-zustand="zielen"]):not([data-zustand="flug"]):not([data-zustand="zurueck"]):not([data-zustand="intro"]) #hud { visibility: hidden; }
+
+  #hinweis {
+    position: absolute;
+    left: 8px; bottom: 8px;
+    z-index: 2;
+    max-width: calc(100% - 16px);
+    padding: 7px 10px;
+    color: var(--muted);
+    background: rgba(16, 36, 58, 0.78);
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.35;
+    pointer-events: none;
+  }
+  #hinweis b { color: var(--text); }
+  #hinweis kbd { padding: 0 4px; color: var(--text); background: var(--surface-2); border-radius: 4px; font: 600 12px/1.4 var(--body); }
+  .nurTouch { display: none; }
+  .touch .nurTouch { display: inline; }
+  .touch .nurMaus { display: none; }
+  :root:not([data-zustand="zielen"]) #hinweis { display: none; }
+
+  #naechsteKnopf {
+    position: absolute;
+    right: 8px; bottom: 8px;
+    z-index: 3;
+  }
+
+  #meldung {
+    position: absolute;
+    left: 50%; top: 30%;
+    z-index: 2;
+    padding: 10px 14px;
+    color: var(--text);
+    background: rgba(16, 36, 58, 0.9);
+    border: 3px solid var(--gelb);
+    border-radius: 10px;
+    font: 12px/1.6 var(--retro);
+    text-align: center;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    max-width: min(320px, calc(100% - 32px));
+  }
+  #meldung small { display: block; margin-top: 4px; color: var(--muted); font: 14px/1.35 var(--body); }
+
+  /* ---------- Fenster ---------- */
+  #fenster {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+    overflow-y: auto;
+    background: rgba(8, 20, 34, 0.55);
+    touch-action: manipulation;
+  }
+  .tafel {
+    width: min(400px, 100%);
+    margin: auto;
+    padding: 22px;
+    background: var(--surface);
+    border: 3px solid var(--bg);
+    border-radius: 14px;
+    box-shadow: 0 0 0 3px var(--gelb), 0 18px 44px rgba(0, 0, 0, 0.55);
+  }
+  .tafel.breit { width: min(760px, 100%); }
+  .marke { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; color: var(--muted); font: 9px/1.5 var(--retro); }
+  .marke svg { width: 20px; height: 20px; flex: none; color: var(--gelb); }
+  #startKrabbe { display: block; width: 176px; height: 144px; margin: 6px auto 0; }
+  h1, h2, h3 { margin: 0; font-weight: 400; }
+  h1 { font: 400 clamp(19px, 6.4vw, 26px)/1.35 var(--retro); color: var(--gelb); text-shadow: 3px 3px 0 var(--koralle), 5px 5px 0 var(--bg); text-align: center; }
+  h2 { font: 400 clamp(14px, 4.4vw, 17px)/1.5 var(--retro); }
+  h3 { font: 400 11px/1.5 var(--retro); }
+  .unterzeile { margin: 10px 0 0; font-size: 17px; font-weight: 600; text-align: center; }
+  .spruch { margin: 10px 0 0; color: var(--tuerkis); font-size: 16px; font-style: italic; }
+  .knoepfe { display: grid; gap: 10px; margin-top: 18px; }
+  .knoepfe.zwei { grid-template-columns: 1fr 1fr; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 10px 16px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 4px 0 var(--bg);
+    font: 600 16px/1.3 var(--body);
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--bg); }
+  .btn.main {
+    min-height: 56px;
+    color: var(--auf-gelb);
+    background: var(--gelb);
+    border-color: var(--bg);
+    box-shadow: 0 4px 0 var(--gelb-kante), 0 4px 0 2px var(--bg);
+    font: 400 15px/1.3 var(--retro);
+  }
+  .btn.main:active { box-shadow: 0 2px 0 var(--gelb-kante); }
+  .btn.klein { min-height: 44px; font-size: 15px; }
+  .zeile { display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+  .zurueck { margin-bottom: 12px; }
+
+  /* Levelauswahl */
+  .gebiet { margin-top: 16px; padding: 12px; border-radius: 12px; background: var(--surface-2); border-left: 6px solid var(--g, var(--tuerkis)); }
+  .gebiet h3 { color: var(--g, var(--tuerkis)); }
+  .gebiet p { margin: 4px 0 10px; color: var(--muted); font-size: 14px; }
+  .karten { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 560px) { .karten { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .karte {
+    position: relative;
+    display: grid;
+    gap: 4px;
+    padding: 6px;
+    color: var(--text);
+    text-align: left;
+    background: var(--surface);
+    border: 2px solid var(--line);
+    border-radius: 10px;
+    cursor: pointer;
+    font: 600 13px/1.25 var(--body);
+    touch-action: manipulation;
+  }
+  .karte:hover:not(:disabled) { border-color: var(--gelb); }
+  .karte canvas { width: 100%; aspect-ratio: 16 / 9; border-radius: 6px; display: block; }
+  .karte .nr { font: 10px/1.4 var(--retro); color: var(--gelb); }
+  .karte .sterne { color: var(--gelb); font-size: 15px; letter-spacing: 2px; }
+  .karte .sterne i { color: rgba(255, 244, 220, 0.25); font-style: normal; }
+  .karte:disabled { cursor: not-allowed; }
+  .karte:disabled .sterne, .karte:disabled .nr { opacity: 0.6; }
+  .schloss { position: absolute; top: 10px; right: 10px; display: grid; place-items: center; width: 30px; height: 30px; background: rgba(16, 36, 58, 0.9); border: 2px solid var(--text); border-radius: 8px; }
+  .schloss svg { width: 14px; height: 14px; }
+
+  /* Krabbenwahl */
+  .krabbenliste { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 14px; }
+  .krabbenkarte {
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    padding: 10px 8px;
+    color: var(--text);
+    background: var(--surface-2);
+    border: 2px solid var(--line);
+    border-radius: 12px;
+    cursor: pointer;
+    font: 600 14px/1.3 var(--body);
+    touch-action: manipulation;
+  }
+  .krabbenkarte canvas { width: 88px; height: 72px; }
+  .krabbenkarte small { color: var(--muted); font-weight: 400; font-size: 13px; text-align: center; }
+  .krabbenkarte[aria-pressed="true"] { border-color: var(--gelb); box-shadow: 0 0 0 2px var(--gelb); }
+  .hinweistext { margin: 12px 0 0; color: var(--muted); font-size: 14px; }
+
+  /* Ergebnis */
+  .sternreihe { display: flex; justify-content: center; gap: 10px; margin: 14px 0 4px; font-size: 44px; line-height: 1; }
+  .sternreihe span { color: rgba(255, 244, 220, 0.18); transform: scale(0.6); transition: transform 0.25s cubic-bezier(.3, 1.6, .5, 1), color 0.2s; }
+  .sternreihe span.an { color: var(--gelb); transform: scale(1); text-shadow: 2px 2px 0 var(--koralle); }
+  .zahlen { display: grid; gap: 8px; margin: 14px 0 0; padding: 0; }
+  .zahlen div { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+  .zahlen dt { color: var(--muted); }
+  .zahlen dd { margin: 0; font: 13px/1.4 var(--retro); }
+  .zahlen .gross dd { color: var(--gelb); font-size: 18px; }
+  .hervor { margin: 12px 0 0; padding: 8px 10px; color: var(--auf-gelb); background: var(--gelb); border-radius: 8px; font: 11px/1.6 var(--retro); text-align: center; }
+  #erfolgKrabbe, #niederlageKrabbe { display: block; width: 110px; height: 90px; margin: 4px auto 0; }
+
+  @media (orientation: landscape) and (max-height: 560px) {
+    .tafel { width: min(640px, 100%); padding: 14px 18px; }
+    .marke { display: none; }
+    #startKrabbe { width: 110px; height: 90px; }
+    .knoepfe { grid-template-columns: 1fr 1fr; margin-top: 12px; }
+    #erfolgKrabbe, #niederlageKrabbe { width: 80px; height: 66px; }
+    .sternreihe { font-size: 34px; margin-top: 6px; }
+    .hudfeld { min-height: 40px; padding: 4px 8px; }
+    .rund { width: 40px; height: 40px; }
+  }
+  @media (max-width: 420px) {
+    #hud { top: 6px; left: 6px; right: 6px; gap: 4px; }
+    .hudlinks { gap: 4px; }
+    .hudfeld { gap: 4px; min-height: 36px; padding: 4px 7px; font-size: 10px; border-radius: 10px; }
+    .boje-ico { width: 12px; height: 12px; }
+    .hudrechts { gap: 4px; }
+    .rund { width: 40px; height: 40px; }
+    #hudName { display: none; }
+    .hudfeld .lbl { font-size: 12px; }
+    .tafel { padding: 18px 16px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn:active { transform: none; }
+    .sternreihe span { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="logo" viewBox="0 0 11 11"><path fill="currentColor" d="M5 0h1v2H5zM3 2h5v1H3zM5 3h1v5H5zM1 6h1v1H1zM9 6h1v1H9zM1 7h2v1H1zM8 7h2v1H8zM2 8h3v1H2zM6 8h3v1H6zM3 9h5v1H3z"/></symbol>
+  <symbol id="schloss" viewBox="0 0 16 16"><path fill="currentColor" d="M5 2h6v1H5zM4 3h1v4H4zM11 3h1v4h-1zM3 7h10v7H3zM7 9h2v3H7z"/></symbol>
+</svg>
+
+<div id="app">
+  <main id="buehne">
+    <canvas id="bild" tabindex="0" role="img" aria-label="Spielfeld von Krabben-Krawall: Ein Hafenkatapult links, rechts Konstruktionen aus Kisten, Planken, Metallträgern und Fässern mit Zielbojen. Krabbe anfassen, zurückziehen und loslassen. Oder Pfeiltasten hoch und runter für den Winkel, links und rechts für die Kraft, Leertaste zum Abschuss."></canvas>
+
+    <div id="hud">
+      <div class="hudlinks">
+        <div class="hudfeld" id="hudLevel"><span>LEVEL <b id="hudNr">1</b></span><span id="hudName"></span></div>
+        <div class="hudfeld" id="hudZieleFeld"><span class="boje-ico" aria-hidden="true"></span><span class="lbl">Ziele:</span><b id="hudZiele">0</b></div>
+        <div class="hudfeld" id="hudKrabbenFeld"><span class="lbl">Krabben:</span><b id="hudKrabben">0</b></div>
+        <div class="hudfeld" id="hudPunkteFeld"><span class="lbl">Punkte:</span><b id="hudPunkte">0</b></div>
+      </div>
+      <div class="hudrechts">
+        <button class="rund" id="uebersichtKnopf" type="button" aria-label="Übersicht über das ganze Level" aria-pressed="false">
+          <svg viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true"><path d="M1 1h5v1H2v4H1zM10 1h5v5h-1V2h-4zM1 10h1v4h4v1H1zM14 10h1v5h-5v-1h4zM5 6h6v4H5z"/></svg>
+        </button>
+        <button class="rund" id="neuKnopfHud" type="button" aria-label="Level neu starten">
+          <svg viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true"><path d="M5 2h6v1H5zM3 3h2v1H3zM11 3h2v1h-2zM2 4h1v2H2zM13 4h1v1h-1zM2 6h1v4H2zM2 10h1v2H2zM3 12h2v1H3zM5 13h6v1H5zM11 12h2v1h-2zM13 10h1v2h-1zM10 5h4v1h-4zM13 2h1v3h-1z"/></svg>
+        </button>
+        <button class="rund" id="pauseKnopf" type="button" aria-label="Pause">
+          <svg viewBox="0 0 16 16" fill="currentColor" shape-rendering="crispEdges" aria-hidden="true"><path d="M4 3h3v10H4zM9 3h3v10H9z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <p id="hinweis"><span class="nurMaus"><b>Krabbe ziehen</b> und loslassen · <kbd>↑</kbd><kbd>↓</kbd> Winkel · <kbd>←</kbd><kbd>→</kbd> Kraft · <kbd>Leertaste</kbd> Los!</span><span class="nurTouch"><b>Krabbe antippen</b>, zurückziehen, loslassen.</span></p>
+    <button class="btn main" id="naechsteKnopf" type="button" hidden>Nächste Krabbe</button>
+    <div id="meldung" role="status" aria-live="polite" hidden></div>
+  </main>
+</div>
+<p id="ansage" class="sr" aria-live="polite"></p>
+
+<div id="fenster">
+  <div class="tafel" role="dialog" aria-modal="true" aria-labelledby="fensterTitel">
+
+    <section id="fStart">
+      <p class="marke"><svg aria-hidden="true"><use href="#logo"/></svg>PIXELHAFEN</p>
+      <h1 data-titel>KRABBEN-<br>KRAWALL</h1>
+      <canvas id="startKrabbe" width="352" height="288" aria-hidden="true"></canvas>
+      <p class="unterzeile">Große Scheren. Große Pläne. Wackelige Kisten.</p>
+      <div class="knoepfe">
+        <button class="btn main" id="spielenKnopf" type="button">Spielen</button>
+        <div class="knoepfe zwei" style="margin-top:0">
+          <button class="btn klein" id="krabbeWahlKnopf" type="button">Krabbe wählen</button>
+          <button class="btn klein js-ton" type="button" aria-pressed="true">Ton: an</button>
+        </div>
+        <a class="btn klein" href="https://moje9328.github.io/spiele/">Zur Pixelhafen-Seite</a>
+      </div>
+    </section>
+
+    <section id="fKrabben" hidden>
+      <h2 data-titel>Krabbe wählen</h2>
+      <p class="hinweistext">Alle Krabben fliegen gleich weit, wiegen gleich viel und treffen gleich stark. Sie sehen nur anders aus.</p>
+      <div class="krabbenliste" id="krabbenListe"></div>
+      <div class="knoepfe"><button class="btn main" id="krabbenFertig" type="button">Fertig</button></div>
+    </section>
+
+    <section id="fLevel" hidden>
+      <div class="zeile zurueck">
+        <h2 data-titel>Level wählen</h2>
+        <button class="btn klein" id="levelZurueck" type="button">Zurück</button>
+      </div>
+      <div id="gebietListe"></div>
+    </section>
+
+    <section id="fPause" hidden>
+      <h2 data-titel>Kurze Pause</h2>
+      <p class="hinweistext" id="pauseText"></p>
+      <div class="knoepfe">
+        <button class="btn main" id="weiterKnopf" type="button">Weiter</button>
+        <button class="btn klein" id="neuKnopf" type="button">Neu starten</button>
+        <div class="knoepfe zwei" style="margin-top:0">
+          <button class="btn klein" id="pauseLevelKnopf" type="button">Levelauswahl</button>
+          <button class="btn klein js-ton" type="button" aria-pressed="true">Ton: an</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="fErfolg" hidden>
+      <h2 data-titel id="erfolgTitel">Geschafft!</h2>
+      <canvas id="erfolgKrabbe" width="220" height="180" aria-hidden="true"></canvas>
+      <p class="spruch" id="erfolgSpruch"></p>
+      <div class="sternreihe" aria-hidden="true"><span>★</span><span>★</span><span>★</span></div>
+      <p class="sr" id="sterneText"></p>
+      <dl class="zahlen">
+        <div><dt>Zielbojen</dt><dd id="eZiele">0</dd></div>
+        <div><dt>Münzen</dt><dd id="eMuenzen">0</dd></div>
+        <div><dt>Trümmer und Ketten</dt><dd id="eTruemmer">0</dd></div>
+        <div><dt>Übrige Krabben</dt><dd id="eBonus">0</dd></div>
+        <div class="gross"><dt>Punkte</dt><dd id="eGesamt">0</dd></div>
+        <div><dt>Bestleistung</dt><dd id="eBest">0</dd></div>
+      </dl>
+      <p class="hervor" id="neuBest" hidden>NEUE BESTLEISTUNG!</p>
+      <div class="knoepfe">
+        <button class="btn main" id="weiterLevelKnopf" type="button">Weiter</button>
+        <div class="knoepfe zwei" style="margin-top:0">
+          <button class="btn klein" id="nochmalErfolgKnopf" type="button">Noch einmal</button>
+          <button class="btn klein" id="erfolgLevelKnopf" type="button">Levelauswahl</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="fNiederlage" hidden>
+      <h2 data-titel>Fast!</h2>
+      <canvas id="niederlageKrabbe" width="220" height="180" aria-hidden="true"></canvas>
+      <p class="spruch" id="spruch"></p>
+      <div class="knoepfe">
+        <button class="btn main" id="nochmalKnopf" type="button">Noch einmal</button>
+        <button class="btn klein" id="niederlageLevelKnopf" type="button">Levelauswahl</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script>
+%%SPIEL%%
+</script>
+</body>
+</html>
