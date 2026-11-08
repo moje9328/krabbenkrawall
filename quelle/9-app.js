@@ -564,6 +564,7 @@
     $('eGesamt').textContent = zahl(gesamt);
     $('eBest').textContent = zahl(Speicher.level(lv.id).best);
     $('neuBest').hidden = !besser.punkte;
+    $('eDuell').textContent = 'Deine Gesamtpunkte: ' + zahl(gesamtStand().punkte) + '. ' + duell.endText(gesamtStand().punkte);
     $('sterneText').textContent = `${sterne} von 3 Sternen`;
     const spans = document.querySelectorAll('.sternreihe span');
     spans.forEach(s => s.classList.remove('an'));
@@ -601,6 +602,29 @@
   // ---------------------------------------------------------- Knöpfe
   // Alle Knöpfe liegen außerhalb der Spielfläche: Ein Klick darauf löst nie einen Schuss aus.
   const klick = (id, f) => $(id).addEventListener('click', (e) => { e.stopPropagation(); Ton.wecke(); f(); });
+  // ---------------------------------------------------------- Freunde herausfordern
+  // Geteilt wird die Summe der Bestpunkte aus allen Leveln und wie viele Level geschafft sind.
+  const gesamtStand = () => {
+    let punkte = 0, geschafft = 0;
+    for (const l of LEVEL) { const e = Speicher.level(l.id); if (e) { punkte += e.best || 0; geschafft++; } }
+    return { punkte, level: geschafft };
+  };
+  const duell = PixelDuell.erstelle({
+    spiel: 'Krabben-Krawall',
+    adresse: 'https://moje9328.github.io/krabbenkrawall/',
+    schluessel: 'pixelhafen.krabbenkrawall.freunde',
+    stand: gesamtStand,
+    einheit: 'Gesamtpunkte',
+    levelWort: 'Level geschafft:',
+    erklaerung: 'Gezählt wird die Summe deiner Bestleistungen aus allen Leveln.',
+  });
+  if (duell.offen) {
+    $('startDuell').textContent = duell.startText();
+    $('startDuell').hidden = false;
+  }
+  klick('freundeKnopf', () => { Ton.klick(); duell.oeffne(); });
+  klick('erfolgFreunde', () => { Ton.klick(); duell.oeffne(); });
+
   klick('spielenKnopf', () => { Ton.klick(); const offen = LEVEL.findIndex(l => !Speicher.level(l.id)); zeigeLevelwahl(); if (offen === 0 && !Speicher.sterneGesamt()) starteLevel(0); });
   klick('krabbeWahlKnopf', () => { Ton.klick(); baueKrabbenwahl(); zeigeFenster('fKrabben'); });
   klick('krabbenFertig', () => { Ton.klick(); zeigeFenster('fStart'); });

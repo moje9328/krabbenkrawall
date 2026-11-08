@@ -205,6 +205,8 @@
   h2 { font: 400 clamp(14px, 4.4vw, 17px)/1.5 var(--retro); }
   h3 { font: 400 11px/1.5 var(--retro); }
   .unterzeile { margin: 10px 0 0; font-size: 17px; font-weight: 600; text-align: center; }
+  .duell { margin: 14px 0 0; padding: 10px 12px; background: var(--surface-2); border-left: 4px solid var(--gelb); border-radius: 8px; line-height: 1.4; }
+  .duell[hidden] { display: none; }
   .spruch { margin: 10px 0 0; color: var(--tuerkis); font-size: 16px; font-style: italic; }
   .knoepfe { display: grid; gap: 10px; margin-top: 18px; }
   .knoepfe.zwei { grid-template-columns: 1fr 1fr; }
@@ -376,12 +378,14 @@
       <h1 data-titel>KRABBEN-<br>KRAWALL</h1>
       <canvas id="startKrabbe" width="352" height="288" aria-hidden="true"></canvas>
       <p class="unterzeile">Große Scheren. Große Pläne. Wackelige Kisten.</p>
+      <p class="duell" id="startDuell" hidden></p>
       <div class="knoepfe">
         <button class="btn main" id="spielenKnopf" type="button">Spielen</button>
         <div class="knoepfe zwei" style="margin-top:0">
           <button class="btn klein" id="krabbeWahlKnopf" type="button">Krabbe wählen</button>
           <button class="btn klein js-ton" type="button" aria-pressed="true">Ton: an</button>
         </div>
+        <button class="btn klein" id="freundeKnopf" type="button">Freunde herausfordern</button>
         <a class="btn klein" href="https://moje9328.github.io/spiele/">Zur Pixelhafen-Seite</a>
       </div>
     </section>
@@ -429,12 +433,14 @@
         <div><dt>Bestleistung</dt><dd id="eBest">0</dd></div>
       </dl>
       <p class="hervor" id="neuBest" hidden>NEUE BESTLEISTUNG!</p>
+      <p class="hinweistext" id="eDuell"></p>
       <div class="knoepfe">
         <button class="btn main" id="weiterLevelKnopf" type="button">Weiter</button>
         <div class="knoepfe zwei" style="margin-top:0">
           <button class="btn klein" id="nochmalErfolgKnopf" type="button">Noch einmal</button>
           <button class="btn klein" id="erfolgLevelKnopf" type="button">Levelauswahl</button>
         </div>
+        <button class="btn klein" id="erfolgFreunde" type="button">Freunde herausfordern</button>
       </div>
     </section>
 

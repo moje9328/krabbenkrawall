@@ -3,7 +3,7 @@
 import pathlib
 q = pathlib.Path(__file__).parent
 TEILE = ['0-planck.min.js', '1-einstellungen.js', '2-level.js', '3-welt.js', '4-krabbe.js',
-         '5-speicher.js', '6-ton.js', '7-grafik.js', '8-eingabe.js', '9-app.js']
+         '5-speicher.js', '6-ton.js', '7-grafik.js', '8-eingabe.js', 'duell.js', '9-app.js']
 def lies(n):
     t = (q / n).read_text()
     # Verweis auf die Quellkarte weglassen (die Datei liegt nicht bei)
