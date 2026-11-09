@@ -3,6 +3,10 @@
 // Fortschritt, Sterne, Bestpunkte, Ton und Krabbenwahl im Browser.
 // Versioniertes Format. Fehlt localStorage oder ist der Inhalt kaputt,
 // läuft das Spiel trotzdem – es merkt sich dann alles nur bis zum Neuladen.
+// Version 3 (überarbeitete Level 1, 5, 6, 7, 9, 13, 15, 23: anspruchsvollere Gebäude
+// und neue Sterne-Schwellen): Freischaltung, Sterne, Ton und Krabbe bleiben erhalten.
+// Die alten Bestpunkte gehören zur alten Wertung und werden nicht übernommen
+// (der alte Stand bleibt unter …-v2 gesichert); neue Bestpunkte zählen ab Version 3.
 // Version 2 (neue Gebäude, neue Punktewertung): Freischaltung, Ton und Krabbe
 // werden aus Version 1 übernommen. Die alten Bestpunkte gehören zur alten
 // Wertung und werden deshalb NICHT übernommen; neue Bestleistungen und Sterne
@@ -11,7 +15,7 @@
 
 const Speicher = (() => {
   const SCHLUESSEL = 'pixelhafen.krabbenkrawall';
-  const VERSION = 2;
+  const VERSION = 3;
   const leer = () => ({ version: VERSION, ton: true, krabbe: 'kalle', level: {}, frei: 1 });
   let daten = leer();
 
@@ -22,7 +26,7 @@ const Speicher = (() => {
   // Nur gültige Werte übernehmen; alles andere fällt auf Standard zurück
   function pruefe(roh) {
     const d = leer();
-    if (!roh || typeof roh !== 'object' || (roh.version !== 1 && roh.version !== VERSION)) return d;
+    if (!roh || typeof roh !== 'object' || (roh.version !== 1 && roh.version !== 2 && roh.version !== VERSION)) return d;
     if (typeof roh.ton === 'boolean') d.ton = roh.ton;
     if (typeof roh.krabbe === 'string' && KRABBEN[roh.krabbe]) d.krabbe = roh.krabbe;
     if (roh.version === 1) {
@@ -40,7 +44,7 @@ const Speicher = (() => {
         if (!e || typeof e !== 'object') continue;
         const sterne = Math.floor(Number(e.sterne));
         const best = Math.floor(Number(e.best));
-        if (sterne >= 1 && sterne <= 3) d.level[lv.id] = { sterne, best: Number.isFinite(best) && best > 0 ? best : 0 };
+        if (sterne >= 1 && sterne <= 3) d.level[lv.id] = { sterne, best: roh.version === VERSION && Number.isFinite(best) && best > 0 ? best : 0 };
       }
     }
     return d;
@@ -57,7 +61,8 @@ const Speicher = (() => {
     try {
       const l = lager();
       const text = l ? l.getItem(SCHLUESSEL) : null;
-      if (text && JSON.parse(text).version === 1) { l.setItem(SCHLUESSEL + '-v1', text); sichern(); }
+      const alt = text ? JSON.parse(text).version : 0;
+      if (alt === 1 || alt === 2) { l.setItem(SCHLUESSEL + '-v' + alt, text); sichern(); }
     } catch (e) { /* egal */ }
   }
 

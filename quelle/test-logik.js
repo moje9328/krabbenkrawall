@@ -214,6 +214,40 @@ abschnitt('Schwierigkeit steigt innerhalb jedes Gebiets (Anteil der Ein-Schuss-S
   console.log(`  Durchschnitt Fischerkai ${(mittel(1, 4) * 100).toFixed(0)}%, Eishafen ${(mittel(28, 32) * 100).toFixed(0)}%`);
 }
 
+// ------------------------------------------------------------------ 6d. Gezielt statt beliebig
+abschnitt('Gezielter Treffer statt beliebiger Treffer (Raster aus Schüssen, die das Gebäude berühren)');
+{
+  // Höchstens so viele der Schüsse, die das Gebäude (nicht Steg oder Kaimauer) berühren,
+  // dürfen das Level allein gewinnen. Einführungslevel großzügiger, spätere strenger.
+  const EINFUEHRUNG = [1, 2, 3, 4, 13, 18, 23, 28];
+  const grenze = (id) => EINFUEHRUNG.includes(id) ? 0.55 : id <= 12 ? 0.40 : 0.40;
+  const AUSNAHME = { 15: 0.70 };   // Bogenwurf über die Mauer: wer dort landet, hat gezielt
+  let summe = 0, n = 0;
+  for (const lv of LEVEL) {
+    let treffer = 0, siege = 0, schwachSiege = 0;
+    for (let w = -10; w <= 80; w += 4) for (let st = 0.3; st <= 1.0001; st += 0.1) {
+      const s = [w, Math.round(st * 100) / 100];
+      let erster = null;
+      const r = L.spiele(lv, [s], { beiSchritt: (wl) => { if (!erster && wl.krabbe && wl.krabbe.erster) erster = wl.krabbe.erster.art; } });
+      if (erster && erster !== 'steg' && erster !== 'mauer') {
+        treffer++;
+        if (r.ergebnis === 'erfolg') siege++;
+        if (r.ergebnis === 'erfolg' && s[1] <= 0.5) schwachSiege++;
+      }
+    }
+    const anteil = treffer ? siege / treffer : 0;
+    ok(anteil <= (AUSNAHME[lv.id] || grenze(lv.id)), `L${lv.id} ${lv.name}: ${(anteil * 100).toFixed(0)} % der Treffer gewinnen allein (erlaubt ${((AUSNAHME[lv.id] || grenze(lv.id)) * 100).toFixed(0)} %)`);
+    ok(schwachSiege === 0, `L${lv.id}: ein schwacher Treffer (Stärke ≤ 0,5) gewinnt das Level allein`);
+    summe += anteil; n++;
+    // Schlecht gewählte Testschüsse: zu schwach, zu kurz oder in den Boden gelenkt
+    const schlecht = [[0, 0.3], [20, 0.4], [45, 0.35], [60, 0.45], [80, 0.5], [10, 0.45], [30, 0.5], [-10, 0.3]];
+    const gewinne = schlecht.filter(s => L.spiele(lv, [s]).ergebnis === 'erfolg').length;
+    ok(gewinne === 0, `L${lv.id}: ${gewinne} der schlecht platzierten Schüsse gewinnen allein`);
+    console.log(`  L${String(lv.id).padStart(2)} ${lv.name.padEnd(22)} Treffer ${String(treffer).padStart(3)} -> allein gewonnen ${(anteil * 100).toFixed(0).padStart(3)} %, Musterlösung ${lv.loesung.length} Schuss/Schüsse`);
+  }
+  console.log(`  Mittel über alle Level: ${(summe / n * 100).toFixed(0)} % der Treffer gewinnen allein`);
+}
+
 // ------------------------------------------------------------------ 7. Punkte, Münzen, Ketten
 abschnitt('Punkte, Münzen und Kettenbonus zählen genau einmal');
 for (const lv of LEVEL) {

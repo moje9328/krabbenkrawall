@@ -62,20 +62,26 @@ const LEVEL = [
   // ---------------------------------------------------------------- Fischerkai
   {
     id: 1, gebiet: 0, name: 'Fischerhütte', schuesse: 3, breite: 18,
-    tipp: 'Die linke Stütze ist schon angeknackst!',
+    tipp: 'Die Boje sitzt im Anbau hinter der Steinmauer. Wirf drüber – oder knack die angeknackste Stütze!',
     stege: [[-5, 24]],
     teile: [
-      P(9.2, 0, 1.6, { riss: 0.45 }), P(11.6, 0, 1.6),
-      BA(8.9, 11.9, 1.6),
-      Z(10.4, 1.82),
-      P(9.2, 1.82, 1.2), P(11.6, 1.82, 1.2),
-      BA(8.8, 12.0, 3.02),
-      ...DACH(8.6, 12.2, 3.24, 1.0, 0),
-      K(12.9, 0, 1),
-      G(10.4, 0.7), G(12.9, 1.6),
+      // Hütte mit Stein-Mitte (Deckung) und Dach
+      P(9.0, 0, 1.6), ST(10.2, 0), ST(10.2, 0.55), P(11.4, 0, 1.6),
+      BA(8.7, 11.7, 1.6),
+      K(9.5, 1.82, 2, 1.0, 1.2), P(11.2, 1.82, 1.2),
+      BA(8.8, 11.6, 3.02),
+      ...DACH(8.6, 11.8, 3.24, 1.0, 0),
+      // Steinmauer zwischen Hütte und Anbau
+      ST(12.2, 0), ST(12.2, 0.55), ST(12.2, 1.1), ST(12.2, 1.65),
+      // Anbau mit der Boje
+      P(13.3, 0, 1.5, { riss: 0.45 }), P(14.9, 0, 1.5),
+      BA(13.1, 15.1, 1.5),
+      Z(14.1, 1.72),
+      K(16.4, 0, 1),
+      G(10.2, 1.4), G(12.2, 2.6), G(16.4, 1.6),
     ],
-    sterne: [1450, 1750],
-    loesung: [[12, 0.94]],   // geprüft: 1920 Punkte
+    sterne: [1550, 1850],
+    loesung: [[22,0.98]],   // geprüft: 2040 Punkte
   },
   {
     id: 2, gebiet: 0, name: 'Netzschuppen', schuesse: 3, breite: 18,
@@ -134,22 +140,22 @@ const LEVEL = [
   // ---------------------------------------------------------------- Containerhafen
   {
     id: 5, gebiet: 1, name: 'Container auf Stelzen', schuesse: 3, breite: 18,
-    tipp: 'Ein schwerer Container auf dünnen Holzstelzen …',
+    tipp: 'Ein Container auf Stelzen: links Metall, in der Mitte Holz, rechts Stein.',
     stege: [[-5, 24]],
     teile: [
-      P(9.4, 0, 1.8, { riss: 0.4, w: 0.22 }), P(11.0, 0, 1.8, { w: 0.22 }), P(12.6, 0, 1.8, { w: 0.22 }),
-      BA(9.1, 12.9, 1.8, { h: 0.24 }),
+      MP(9.4, 0, 1.8), P(11.0, 0, 1.8, { w: 0.22, riss: 0.4 }), P(12.6, 0, 1.8, { w: 0.22 }), ST(13.9, 0), ST(13.9, 0.55), ST(13.9, 1.1),
+      BA(9.1, 14.4, 1.8, { h: 0.24 }),
       Z(10.2, 0),
       C(11.0, 2.04, 0, 3.2, 1.2),
       K(10.3, 3.24, 1, 0.8, 0.8), Z(11.6, 3.24),
       G(11.8, 1.0), G(13.6, 1.5),
     ],
-    sterne: [1850, 2150],
-    loesung: [[0, 0.98]],   // geprüft: 2320 Punkte
+    sterne: [1800, 2100],
+    loesung: [[14,0.9]],   // geprüft: 2280 Punkte
   },
   {
     id: 6, gebiet: 1, name: 'Kranlager', schuesse: 4, breite: 18,
-    tipp: 'Metall ist schwer. Wenn es fällt, nimmt es alles mit.',
+    tipp: 'Metall ist schwer. Und im Schuppen rechts wartet noch eine Boje.',
     stege: [[-5, 24]],
     teile: [
       P(9.2, 0, 1.5), P(11.2, 0, 1.5, { riss: 0.35 }), P(13.2, 0, 1.5),
@@ -158,28 +164,34 @@ const LEVEL = [
       K(9.4, 1.76, 0), P(10.3, 1.76, 1.3), Z(11.2, 1.76), P(12.1, 1.76, 1.3), K(13.0, 1.76, 1),
       BA(9.0, 13.4, 3.06),
       M(9.2, 10.8, 3.28), Z(12.2, 3.28),
-      G(14.3, 1.0), G(8.2, 2.5),
+      // Lagerschuppen rechts, unabhängig vom Haupthaus
+      ST(14.7, 0), ST(14.7, 0.55), ST(14.7, 1.1),
+      P(15.9, 0, 1.5), P(17.3, 0, 1.5, { riss: 0.35 }),
+      BA(15.7, 17.5, 1.5),
+      Z(16.6, 1.72),
+      G(14.3, 1.8), G(8.2, 2.5),
     ],
-    sterne: [2800, 3100],
-    loesung: [[18, 0.82]],   // geprüft: 3280 Punkte
+    sterne: [3250, 3550],
+    loesung: [[12,0.9]],   // geprüft: 3740 Punkte
   },
   {
     id: 7, gebiet: 1, name: 'Schiefer Signalturm', schuesse: 3, breite: 18,
     tipp: 'Jedes Stockwerk hängt ein Stück weiter über.',
     stege: [[-5, 24]],
     teile: [
-      P(10, 0, 1.4), P(11.4, 0, 1.4),
+      ST(8.7, 0), ST(8.7, 0.55), ST(8.7, 1.1), ST(8.7, 1.65),
+      P(10, 0, 1.4), P(11.4, 0, 1.4, { riss: 0.4 }),
       BA(9.8, 11.9, 1.4),
       Z(10.7, 0),
-      P(10.35, 1.62, 1.3), P(11.75, 1.62, 1.3),
+      MP(10.35, 1.62, 1.3), P(11.75, 1.62, 1.3),
       BA(10.15, 12.25, 2.92),
       P(10.7, 3.14, 1.2), P(12.1, 3.14, 1.2),
       BA(10.5, 12.6, 4.34),
       Z(11.6, 4.56), K(10.75, 4.56, 2, 0.6, 0.6),
       G(12.9, 2.0), G(13.6, 0.6), G(9.2, 4.0),
     ],
-    sterne: [2050, 2350],
-    loesung: [[66, 0.82]],   // geprüft: 2520 Punkte
+    sterne: [2100, 2400],
+    loesung: [[68,0.82]],   // geprüft: 2560 Punkte
   },
   {
     id: 8, gebiet: 1, name: 'Zollhaus', schuesse: 4, breite: 18,
@@ -201,20 +213,20 @@ const LEVEL = [
   // ---------------------------------------------------------------- Leuchtturmbucht
   {
     id: 9, gebiet: 2, name: 'Aussichtsturm', schuesse: 3, breite: 18,
-    tipp: 'Ein Turm auf Steinsockel. Oben drauf ein schweres Fass.',
+    tipp: 'Zwei Bojen oben, eine hinter der Steinmauer. Plane die Reihenfolge!',
     stege: [[-5, 24]],
     teile: [
       ST(10.75, 0), ST(11.65, 0), ST(10.75, 0.55), ST(11.65, 0.55),
-      P(10.6, 1.1, 1.8), P(11.8, 1.1, 1.8),
+      P(10.6, 1.1, 1.8), P(11.8, 1.1, 1.8, { riss: 0.4 }),
       BA(10.4, 12.0, 2.9),
       P(10.6, 3.12, 1.8), P(11.8, 3.12, 1.8),
       BA(9.6, 12.8, 4.92),
       Z(10.15, 5.14), FV(11.2, 5.14), Z(12.25, 5.14),
-      Z(13.7, 0), K(14.6, 0, 1),
+      ST(6.6, 0), ST(6.6, 0.55), Z(8.1, 0), K(14.0, 0, 1),
       G(11.2, 2.0), G(13.6, 3.2), G(9.0, 3.4),
     ],
-    sterne: [2500, 2800],
-    loesung: [[54, 0.78]],   // geprüft: 2970 Punkte
+    sterne: [2350, 2650],
+    loesung: [[22,0.74]],   // geprüft: 2820 Punkte
   },
   {
     id: 10, gebiet: 2, name: 'Bootshaus am Wasser', schuesse: 4, breite: 20,
@@ -275,17 +287,17 @@ const LEVEL = [
   // ---------------------------------------------------------------- Werft im Morgennebel (neu: Kaimauern)
   {
     id: 13, gebiet: 3, name: 'Hochkai', schuesse: 3, breite: 18,
-    tipp: 'Neu: die Kaimauer. Sie steht fest – das Haus darauf nicht.',
+    tipp: 'Neu: die Kaimauer. Sie steht fest. Das Haus darauf hat vorne Stein und hinten Holz.',
     stege: [[-5, 24]], mauern: [[8.5, 14.5, 1.6]],
     teile: [
-      P(9.6, 1.6, 1.5, { riss: 0.4 }), P(12.4, 1.6, 1.5),
-      BA(9.3, 12.7, 3.1),
-      Z(11.0, 1.6),
-      K(9.9, 3.32, 1), Z(11.4, 3.32),
+      ST(8.95, 1.6), ST(8.95, 2.15), P(10.1, 1.6, 1.5, { riss: 0.4 }), P(12.4, 1.6, 1.5), P(13.4, 1.6, 1.5),
+      BA(9.0, 13.7, 3.1),
+      Z(11.3, 1.6),
+      K(9.9, 3.32, 1), Z(11.6, 3.32), K(13.0, 3.32, 2, 0.8, 0.8),
       G(13.6, 2.4), G(15.4, 0.8),
     ],
-    sterne: [1550, 1850],
-    loesung: [[22, 0.94]],   // geprüft: 2020 Punkte
+    sterne: [1950, 2250],
+    loesung: [[22,0.98]],   // geprüft: 2410 Punkte
   },
   {
     id: 14, gebiet: 3, name: 'Werftkran-Lager', schuesse: 4, breite: 18,
@@ -308,14 +320,14 @@ const LEVEL = [
     tipp: 'Die Mauer schützt die Stützen. Wirf im Bogen darüber!',
     stege: [[-5, 24]], mauern: [[8.6, 9.6, 2.9]],
     teile: [
-      P(10.8, 0, 1.8, { w: 0.24 }), P(13.2, 0, 1.8, { w: 0.24, riss: 0.3 }),
-      BA(10.5, 13.5, 1.8, { h: 0.26 }),
+      MP(10.8, 0, 1.8), P(13.2, 0, 1.8, { w: 0.24, riss: 0.3 }), ST(14.9, 0), ST(14.9, 0.55), ST(14.9, 1.1), ST(14.9, 1.65),
+      BA(10.5, 14.2, 1.8, { h: 0.26 }),
       Z(12.0, 0),
-      K(11.1, 2.06, 1), Z(12.6, 2.06),
+      K(11.1, 2.06, 1), Z(12.6, 2.06), K(13.5, 2.06, 2, 0.9, 0.9),
       G(10.1, 3.9), G(14.6, 1.0),
     ],
-    sterne: [1550, 1850],
-    loesung: [[70, 0.9]],   // geprüft: 2020 Punkte
+    sterne: [1600, 1900],
+    loesung: [[46,0.82]],   // geprüft: 2090 Punkte
   },
   {
     id: 16, gebiet: 3, name: 'Helling-Gerüst', schuesse: 4, breite: 18,
@@ -431,14 +443,14 @@ const LEVEL = [
     tipp: 'Ein Haus auf Pfählen über dem Wasser. Ab in die Wellen!',
     stege: [[-5, 9.5], [17, 30]], mauern: [[11, 15.5, -0.35]],
     teile: [
-      P(11.4, -0.35, 2.2), P(13.2, -0.35, 2.2, { riss: 0.2 }), P(15.0, -0.35, 2.2),
+      MP(11.4, -0.35, 2.2), P(12.4, -0.35, 2.2), P(13.4, -0.35, 2.2, { riss: 0.2 }), P(14.3, -0.35, 2.2), MP(15.0, -0.35, 2.2),
       BA(11.1, 15.3, 1.85, { h: 0.24 }),
-      Z(12.3, -0.35),
+      Z(12.9, -0.35),
       K(11.8, 2.09, 1), Z(13.2, 2.09), F(14.6, 2.09),
       G(16.2, 0.3), G(10.2, 1.2),
     ],
-    sterne: [1700, 2000],
-    loesung: [[24, 0.86]],   // geprüft: 2150 Punkte
+    sterne: [1850, 2150],
+    loesung: [[16,0.94]],   // geprüft: 2300 Punkte
   },
   {
     id: 24, gebiet: 5, name: 'Weiter Wurf', schuesse: 3, breite: 21,
@@ -446,14 +458,14 @@ const LEVEL = [
     stege: [[-5, 27]],
     teile: [
       K(13.5, 0, 2), K(13.5, 1, 0),
-      P(16.2, 0, 1.6), P(18.2, 0, 1.6, { riss: 0.35 }),
-      BA(16.0, 18.4, 1.6),
-      Z(17.2, 0),
-      K(16.6, 1.82, 0), Z(17.8, 1.82),
+      MP(16.0, 0, 1.6), P(17.1, 0, 1.6), P(18.5, 0, 1.6, { riss: 0.35 }),
+      BA(15.8, 18.9, 1.6),
+      Z(17.8, 0),
+      K(16.6, 1.82, 0), Z(17.65, 1.82), K(18.5, 1.82, 1, 0.7, 0.7),
       G(15.0, 2.6), G(19.4, 0.8),
     ],
     sterne: [1550, 1850],
-    loesung: [[24, 0.98]],   // geprüft: 2040 Punkte
+    loesung: [[38,0.86]],   // geprüft: 2040 Punkte
   },
   {
     id: 25, gebiet: 5, name: 'Wellenbrecher', schuesse: 3, breite: 19,

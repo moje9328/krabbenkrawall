@@ -224,7 +224,7 @@ async def main():
         # ---------------------------------------------------------- Speicherstand
         print('\n## Speicherstand')
         daten = await pg.evaluate("JSON.parse(localStorage.getItem('pixelhafen.krabbenkrawall'))")
-        ok(daten and daten['version'] == 2 and len(daten['level']) == len(loesungen) - 1, 'Fortschritt nicht gespeichert')
+        ok(daten and daten['version'] == 3 and len(daten['level']) == len(loesungen) - 1, 'Fortschritt nicht gespeichert')
         sterne_vorher = daten['level']['1']['sterne']
         # Schlechtere Wiederholung von Level 1: Niederlage
         await level_bereit(pg, 0)
@@ -254,7 +254,7 @@ async def main():
         await pg.evaluate("localStorage.clear(); localStorage.setItem('pixelhafen.krabbenkrawall', JSON.stringify({version: 1, ton: true, krabbe: 'goldi', level: {1: {sterne: 3, best: 26000}, 2: {sterne: 1, best: 9000}, 3: {sterne: 2, best: 20000}}}))")
         await pg.reload(); await pg.wait_for_timeout(300)
         neu = await pg.evaluate("JSON.parse(localStorage.getItem('pixelhafen.krabbenkrawall'))")
-        ok(neu['version'] == 2 and neu['krabbe'] == 'goldi' and neu['frei'] == 4 and neu['level'] == {}, f'Übernahme aus Version 1 falsch: {neu}')
+        ok(neu['version'] == 3 and neu['krabbe'] == 'goldi' and neu['frei'] == 4 and neu['level'] == {}, f'Übernahme aus Version 1 falsch: {neu}')
         ok(await pg.evaluate("localStorage.getItem('pixelhafen.krabbenkrawall-v1') !== null"), 'Alter Stand nicht aufbewahrt')
         await pg.click('#spielenKnopf'); await pg.wait_for_timeout(300)
         frei = await pg.evaluate('[...document.querySelectorAll(".karte")].map(k => !k.disabled)')
@@ -266,6 +266,9 @@ async def main():
         await pg.click('#spielenKnopf'); await pg.wait_for_timeout(400)
         frei = await pg.evaluate('[...document.querySelectorAll(".karte")].map(k => !k.disabled)')
         ok(frei[:13] == [True] * 13 and not any(frei[13:]), f'Alter Spielstand mit 12 Leveln: Freischaltung falsch {frei}')
+        neu2 = await pg.evaluate("JSON.parse(localStorage.getItem('pixelhafen.krabbenkrawall'))")
+        ok(neu2['version'] == 3 and neu2['frei'] == 12 and neu2['level']['1']['sterne'] == 2 and neu2['level']['1']['best'] == 0, f'Übernahme aus Version 2 falsch: {neu2["level"].get("1")}')
+        ok(await pg.evaluate("localStorage.getItem('pixelhafen.krabbenkrawall-v2') !== null"), 'Stand der Version 2 nicht aufbewahrt')
         await pg.screenshot(path=str(BILDER / 'levelwahl-alter-stand.png'), full_page=True)
         print('  Spielstand aus der 12-Level-Version: Level 1–13 frei, 14–32 gesperrt, Sterne erhalten')
         print('  Version 2 gespeichert, Sterne bleiben bei schlechterer Runde, Ton/Krabbe/Freischaltung werden geladen, kaputte Daten stören nicht')
@@ -278,7 +281,7 @@ async def main():
         ctx, pg = await neue_seite(b, 1440, 900, init=sperre)
         await pg.click('#spielenKnopf')
         ok(await warte_auf(pg, "window.__krawall.zustand() === 'zielen' && window.__krawall.kameraRuhig()", 8000), 'Ohne localStorage startet kein Level')
-        await pg.evaluate('window.__krawall.schiesse(6, 0.94)')
+        await pg.evaluate('window.__krawall.schiesse(22, 0.98)')
         ok(await warte_auf(pg, "window.__krawall.zustand() === 'erfolg'", 30000), 'Ohne localStorage kein Erfolg')
         ok(not pg.fehler, f'Ohne localStorage: Fehler {pg.fehler}')
         print('  Spiel startet, Level 1 lässt sich gewinnen, keine Fehler')

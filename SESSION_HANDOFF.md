@@ -4,6 +4,26 @@ Stand: 6. November 2026. Erweiterung von 12 auf **32 Level** in **7 Gebieten**.
 Die Erweiterung ist **online**: https://moje9328.github.io/krabbenkrawall/
 (Karte auf https://moje9328.github.io/spiele/ ist aktualisiert).
 
+## Runde 9. November 2026: anspruchsvollere, faire Level
+
+**Wunsch:** Ein beliebiger erster Treffer darf nicht fast überall das Level gewinnen. Angriffspunkt, Winkel, Stärke und Reihenfolge sollen zählen.
+
+**Messung vorher (Raster aus Schüssen, die das Gebäude wirklich berühren, Anteil davon, der allein gewinnt):**
+L1 85 %, L13 81 %, L9 66 %, L7 60 %, L15 58 %, L5 55 %, L23 54 %, L2 48 %, L28 49 %. Ursache: Holz bricht schon bei mäßigem Tempo (Aufprallstärke = reduzierte Masse × (Tempo − Schwelle)), die Krabbe fliegt danach fast ungebremst weiter, und herabfallende Holztrümmer lösen Bojen aus. Wer ein Holzgebäude traf, gewann.
+
+**Änderungen (nur Level, Materialwerte unverändert):**
+- Nur sichtbare Materialien: Steinmauern als Deckung, Metallstützen, Stein-Fundament, mehr Stützen. Keine unsichtbaren Flächen, keine versteckte Haltbarkeit.
+- L1: Boje im Anbau hinter einer Steinmauer (4 Blöcke), Hütte nur noch Köder mit Münzen. L5: Metall links, Holz in der Mitte, Stein rechts. L6: zweites, unabhängiges Lagerhaus rechts mit vierter Boje. L7: Steinwand vor dem Turm, Metallstütze, angeknackste Stütze hinten. L9: zwei Bojen oben, eine hinter einer niedrigen Steinmauer (Reihenfolge planen). L13: Steinblöcke vorn, mehr Stützen, schwere Kiste. L15: Steinmauer rechts, Metallstütze. L23: fünf Pfähle, davon zwei aus Metall. L24: Metallstütze, zusätzliche Pfähle, kleine Kiste als Last.
+- Neue Lösungen und Sterne-Schwellen für L1, 5, 6, 7, 9, 13, 15, 23, 24 (3 Sterne etwa Lösung − 150 Punkte, 2 Sterne 300 weniger).
+
+**Messung nachher** (`node quelle/test-logik.js`, Abschnitt „Gezielter Treffer statt beliebiger Treffer“): Anteil der Treffer, die allein gewinnen: L1 37 %, L5 38 %, L7 30 %, L9 18 %, L13 34 %, L23 22 %, L24 29 %; L15 52 % (Bogenwurf über die Mauer, dort darf gezielt belohnt werden). Mittel über alle 32 Level: 19 %.
+
+**Neuer Test:** Jedes Level darf höchstens 55 % (Einführungslevel 1–4, 13, 18, 23, 28) bzw. 40 % (übrige) Treffer-Siege haben, ein schwacher Treffer (Stärke ≤ 0,5) gewinnt nie allein, acht schlecht gewählte Schüsse (schwach, kurz, in den Boden) gewinnen nie.
+
+**Spielstand:** Version 3. Freischaltung, Sterne, Ton und Krabbe bleiben. Alte Bestpunkte gehören zur alten Wertung und werden nicht übernommen (Sicherung unter `pixelhafen.krabbenkrawall-v2`). Cache `krabbenkrawall-v5`.
+
+**Nicht geprüft:** Spielgefühl auf einem echten Handy. Die Schwierigkeit ist mit einem Raster gemessen, keine echten Spieler. Nicht veröffentlicht (pushen erst nach Rückfrage).
+
 ## Bauen und prüfen
 
 ```
